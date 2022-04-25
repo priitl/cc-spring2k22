@@ -1,3 +1,5 @@
+package com.priitlaht.challenge.game.model;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,17 +11,17 @@ import java.util.Map;
 @Getter
 @RequiredArgsConstructor(staticName = "of")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-class Base {
+public class Base {
     final Point location;
     final Map<Integer, Monster> endangeringMonsters = new HashMap<>();
     int health = 3;
     int mana = 0;
 
-    boolean isInDanger() {
+    public boolean isInDanger() {
         return !endangeringMonsters.isEmpty();
     }
 
-    void update(int health, int mana) {
+    public void update(int health, int mana) {
         this.health = health;
         this.mana = mana;
     }
