@@ -20,6 +20,18 @@ public abstract class Entity {
         this.isControlled = isControlled;
     }
 
+    public boolean isShielded() {
+        return shieldLife > 0;
+    }
+
+    public void shield() {
+        this.shieldLife = 12;
+    }
+
+    public void control() {
+        this.isControlled = true;
+    }
+
     public int distance(Entity other) {
         return this.location.distance(other.location);
     }

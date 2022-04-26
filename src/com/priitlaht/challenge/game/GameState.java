@@ -7,9 +7,7 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Builder
@@ -17,7 +15,7 @@ import java.util.Map;
 public class GameState {
     final Base myBase;
     final Base opponentBase;
-    final Map<Integer, Hero> heroes = new HashMap<>(3);
+    final List<Hero> heroes = new ArrayList<>(3);
     final List<Enemy> visibleEnemies = new ArrayList<>(3);
     final List<Monster> visibleMonsters = new ArrayList<>();
     int round;
@@ -29,6 +27,10 @@ public class GameState {
         myBase.update(roundInfo.myBaseHealth(), roundInfo.myBaseMana());
         opponentBase.update(roundInfo.opponentBaseHealth(), roundInfo.opponentBaseHealth());
         roundInfo.entityInfos().forEach(this::updateEntityState);
+        myBase.updateEndangeringMonsters(visibleMonsters);
+        opponentBase.updateEndangeringMonsters(visibleMonsters);
+        heroes.forEach(hero -> hero.updateNearbyMonsters(visibleMonsters));
+        visibleEnemies.forEach(enemy -> enemy.updateNearbyMonsters(visibleMonsters));
     }
 
     private void updateEntityState(Game.RoundInfo.EntityInfo entity) {
@@ -37,11 +39,11 @@ public class GameState {
                 visibleMonsters.add(toMonster(entity));
                 break;
             case HERO:
-                Hero hero = heroes.get(entity.id());
-                if (hero == null) {
-                    heroes.put(entity.id(), toHero(entity));
+                if (round == 1) {
+                    heroes.add(toHero(entity));
                 } else {
-                    hero.update(Point.of(entity.x(), entity.y()), entity.shieldLife(), entity.isControlled());
+                    heroes.stream().filter(hero -> hero.id() == entity.id()).findFirst().ifPresent(hero ->
+                            hero.update(Point.of(entity.x(), entity.y()), entity.shieldLife(), entity.isControlled()));
                 }
                 break;
             case ENEMY:
@@ -75,10 +77,10 @@ public class GameState {
         return Hero.builder()
                 .id(entity.id())
                 .origin(myBase.location().subtractAbs(Hero.ORIGINS[heroes.size()]))
+                .type(Hero.TYPES[heroes.size()])
                 .location(Point.of(entity.x(), entity.y()))
                 .shieldLife(entity.shieldLife())
                 .isControlled(entity.isControlled())
-                .strategy(Hero.Strategy.FARM)
                 .build();
     }
 }

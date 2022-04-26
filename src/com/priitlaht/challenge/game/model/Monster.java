@@ -12,10 +12,14 @@ import java.util.Arrays;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Monster extends Entity {
+    public static final int DISTANCE_PER_TURN = 400;
+    public static final int BASE_TARGET_RADIUS = 5000;
+
     int health;
     Point velocity;
     Target target;
     Threat threat;
+    Integer assignedHeroId;
 
     public Point nextLocation() {
         return this.location().add(velocity);
@@ -27,6 +31,27 @@ public class Monster extends Entity {
 
     public int nextDistance(Point point) {
         return this.nextLocation().distance(point);
+    }
+
+    public boolean hasNoHeroAssigned() {
+        return this.assignedHeroId == null;
+    }
+
+    public void assignHero(int heroId) {
+        this.assignedHeroId = heroId;
+    }
+
+    public void unassignHero() {
+        this.assignedHeroId = null;
+    }
+
+    public boolean isTargetingBase(Base base) {
+        return this.target() == Monster.Target.BASE
+                && this.threat() == (base.isMine() ? Monster.Threat.MY_BASE : Monster.Threat.OPPONENT_BASE);
+    }
+
+    public boolean isThreateningBase(Base base) {
+        return this.threat() == (base.isMine() ? Monster.Threat.MY_BASE : Monster.Threat.OPPONENT_BASE);
     }
 
     @RequiredArgsConstructor

@@ -4,11 +4,12 @@ import com.priitlaht.challenge.game.model.Point;
 import lombok.Value;
 
 @Value(staticConstructor = "of")
-public class MoveCommand implements Command {
+public class WindCommand implements Command {
+    public static final int RADIUS = 1280;
     Point target;
 
     @Override
     public void execute() {
-        System.out.printf("MOVE %d %d%n", target.x(), target.y());
+        System.out.printf("SPELL WIND %d %d%n", target.x(), target.y());
     }
 }

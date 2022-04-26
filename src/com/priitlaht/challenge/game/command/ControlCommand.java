@@ -4,11 +4,14 @@ import com.priitlaht.challenge.game.model.Point;
 import lombok.Value;
 
 @Value(staticConstructor = "of")
-public class MoveCommand implements Command {
+public class ControlCommand implements Command {
+    public static final int RADIUS = 2200;
+
+    int entityId;
     Point target;
 
     @Override
     public void execute() {
-        System.out.printf("MOVE %d %d%n", target.x(), target.y());
+        System.out.printf("SPELL CONTROL %d %d %d%n", entityId, target.x(), target.y());
     }
 }

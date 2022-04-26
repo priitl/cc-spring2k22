@@ -3,6 +3,6 @@
 To combine all classes and delombok the code, run:
 
 ```
-./cc-tools/file-merger.sh ./src java  
+./cc-tools/file-merger.sh ./src java com.priitlaht
 ```
 
