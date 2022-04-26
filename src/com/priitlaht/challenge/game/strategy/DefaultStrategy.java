@@ -15,13 +15,18 @@ import java.util.stream.Collectors;
 
 public class DefaultStrategy implements Strategy {
 
+    // Make defenders stay in place
     @Override
     public void play(GameState gameState) {
         Base myBase = gameState.myBase();
         List<Command> commands = gameState.heroes().stream()
                 .map(hero -> {
+                    Hero otherDefender = gameState.heroes().stream()
+                            .filter(other -> other.id() != hero.id() && other.type() != Hero.Type.HARASSER)
+                            .findFirst().orElse(hero);
                     if (myBase.isInDanger() && Hero.Type.HARASSER != hero.type()) {
                         Optional<Command> command = myBase.endangeringMonsters().stream()
+                                .filter(monster -> monster.hasNoHeroAssignedOrAssignedTo(hero.id()))
                                 .min(Comparator.comparing(monster -> monster.distance(hero.location())))
                                 .map(monster -> {
                                     if (myBase.hasEnoughManaForSpells() && monster.distance(myBase.location()) <= 5000
@@ -31,24 +36,28 @@ public class DefaultStrategy implements Strategy {
                                         monster.assignHero(hero.id());
                                         return WindCommand.of(gameState.opponentBase().location());
                                     }
-                                    if (monster.distance(hero.location()) < 1200) {
-                                        monster.assignHero(hero.id());
+                                    if (otherDefender.distance(monster) > hero.distance(monster)) {
+                                        return MoveCommand.of(monster.nextLocation());
                                     }
-                                    return MoveCommand.of(monster.nextLocation());
+                                    return null;
                                 });
                         if (command.isPresent()) {
                             return command.get();
                         }
                     }
-                    if (gameState.round() > 100 && Hero.Type.HARASSER == hero.type() && hero.distance(gameState.opponentBase().location()) < 7500) {
-                        List<Monster> windableMonsters = gameState.visibleMonsters().stream()
-                                .filter(monster -> !monster.isControlled() && !monster.isShielded()
-                                        && myBase.mana() > 50 && monster.distance(hero) <= WindCommand.RADIUS).collect(Collectors.toList());
-                        if (windableMonsters.size() > 2) {
-                            windableMonsters.forEach(monster -> monster.assignHero(hero.id()));
-                            myBase.castSpell();
-                            return WindCommand.of(gameState.opponentBase().location());
-                        }
+
+                    //TODO: figure out why it does not work
+                    List<Monster> windableMonsters = gameState.visibleMonsters().stream()
+                            .filter(monster -> !monster.isShielded()
+                                    && myBase.mana() > 50 && monster.nextDistance(hero) <= WindCommand.RADIUS).collect(Collectors.toList());
+                    if (windableMonsters.size() > 2) {
+                        windableMonsters.forEach(monster -> monster.assignHero(hero.id()));
+                        myBase.castSpell();
+                        return WindCommand.of(gameState.opponentBase().location());
+                    }
+
+                    //TODO: control enemy heroes and move closer to base if there are multiple monsters
+                    if (gameState.round() > 100 && Hero.Type.HARASSER == hero.type() && hero.distance(gameState.opponentBase().location()) < hero.distance(gameState.myBase().location())) {
                         Optional<Command> command = gameState.visibleMonsters().stream()
                                 .filter(monster -> monster.isControlled() && !monster.isShielded() &&
                                         monster.isThreateningBase(gameState.opponentBase())
@@ -66,7 +75,7 @@ public class DefaultStrategy implements Strategy {
                     }
                     if (gameState.round() > 100) {
                         Optional<Command> command = gameState.visibleMonsters().stream()
-                                .filter(monster -> monster.hasNoHeroAssigned() && !monster.isShielded() && !monster.isControlled()
+                                .filter(monster -> monster.hasNoHeroAssignedOrAssignedTo(hero.id()) && !monster.isShielded() && !monster.isControlled()
                                         && monster.distance(myBase.location()) > Monster.BASE_TARGET_RADIUS
                                         && monster.threat() != Monster.Threat.OPPONENT_BASE &&
                                         myBase.mana() > 50 && monster.distance(hero) <= ControlCommand.RADIUS)
@@ -81,7 +90,7 @@ public class DefaultStrategy implements Strategy {
                         }
                     }
                     Optional<Command> command = gameState.visibleMonsters().stream()
-                            .filter(monster -> monster.hasNoHeroAssigned() &&
+                            .filter(monster -> monster.hasNoHeroAssignedOrAssignedTo(hero.id()) &&
                                     (Hero.Type.DEFENDER != hero.type() || monster.nextDistance(hero.origin()) <= 4000))
                             .min(Comparator.comparing(monster -> monster.distance(hero)))
                             .map(monster -> {

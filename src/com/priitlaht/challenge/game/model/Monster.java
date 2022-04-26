@@ -33,16 +33,16 @@ public class Monster extends Entity {
         return this.nextLocation().distance(point);
     }
 
-    public boolean hasNoHeroAssigned() {
-        return this.assignedHeroId == null;
+    public boolean hasHeroAssigned() {
+        return this.assignedHeroId != null;
+    }
+
+    public boolean hasNoHeroAssignedOrAssignedTo(int heroId) {
+        return !hasHeroAssigned() || assignedHeroId == heroId;
     }
 
     public void assignHero(int heroId) {
         this.assignedHeroId = heroId;
-    }
-
-    public void unassignHero() {
-        this.assignedHeroId = null;
     }
 
     public boolean isTargetingBase(Base base) {

@@ -7,7 +7,10 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder
@@ -18,22 +21,24 @@ public class GameState {
     final List<Hero> heroes = new ArrayList<>(3);
     final List<Enemy> visibleEnemies = new ArrayList<>(3);
     final List<Monster> visibleMonsters = new ArrayList<>();
+    final Map<Integer, Integer> heroAssignments = new HashMap<>();
     int round;
 
     public void update(Game.RoundInfo roundInfo) {
+        Map<Integer, Integer> previousRoundMonsterAssignments = visibleMonsters.stream()
+                .filter(Monster::hasHeroAssigned)
+                .collect(Collectors.toMap(Monster::id, Monster::assignedHeroId));
         round++;
         visibleMonsters.clear();
         visibleEnemies.clear();
         myBase.update(roundInfo.myBaseHealth(), roundInfo.myBaseMana());
         opponentBase.update(roundInfo.opponentBaseHealth(), roundInfo.opponentBaseHealth());
-        roundInfo.entityInfos().forEach(this::updateEntityState);
+        roundInfo.entityInfos().forEach(entity -> updateEntityState(entity, previousRoundMonsterAssignments.get(entity.id())));
         myBase.updateEndangeringMonsters(visibleMonsters);
         opponentBase.updateEndangeringMonsters(visibleMonsters);
-        heroes.forEach(hero -> hero.updateNearbyMonsters(visibleMonsters));
-        visibleEnemies.forEach(enemy -> enemy.updateNearbyMonsters(visibleMonsters));
     }
 
-    private void updateEntityState(Game.RoundInfo.EntityInfo entity) {
+    private void updateEntityState(Game.RoundInfo.EntityInfo entity, Integer assignedHeroId) {
         switch (Game.RoundInfo.EntityInfo.Type.getByValue(entity.type())) {
             case MONSTER:
                 visibleMonsters.add(toMonster(entity));
