@@ -35,7 +35,7 @@ public class DefenderStrategy extends Strategy {
         if (moveToMonsterCommand.isPresent()) {
             return moveToMonsterCommand.get();
         }
-        return commandFactory.moveToRandomPositionNearOrigin(hero);
+        return commandFactory.moveToRandomPositionNearOrigin(hero, state);
     }
 
 }

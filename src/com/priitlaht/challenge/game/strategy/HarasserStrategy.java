@@ -19,6 +19,10 @@ public class HarasserStrategy extends Strategy {
         if (shieldClosestHeroCommand.isPresent()) {
             return shieldClosestHeroCommand.get();
         }
+        Optional<Command> stayAwayFromMonstersCommand = commandFactory.stayAwayFromMonsters(hero, state);
+        if (stayAwayFromMonstersCommand.isPresent()) {
+            return stayAwayFromMonstersCommand.get();
+        }
         Optional<Command> harassEnemyBaseCommand = commandFactory.harassEnemyBase(hero, state);
         if (harassEnemyBaseCommand.isPresent()) {
             return harassEnemyBaseCommand.get();
@@ -31,6 +35,6 @@ public class HarasserStrategy extends Strategy {
         if (moveToMonsterCommand.isPresent()) {
             return moveToMonsterCommand.get();
         }
-        return commandFactory.moveToRandomPositionNearOrigin(hero);
+        return commandFactory.moveToRandomPositionNearOrigin(hero, state);
     }
 }

@@ -21,8 +21,8 @@ public class Game {
         int enemyBaseY = Math.abs(GameConstants.FIELD_HEIGHT - myBaseLocation.y());
         Point enemyBaseLocation = Point.of(enemyBaseX, enemyBaseY);
         GameState state = GameState.builder()
-                .myBase(Base.of(myBaseLocation, true))
-                .opponentBase(Base.of(enemyBaseLocation, false))
+                .myBase(Base.of(myBaseLocation, true, myBaseX == 0))
+                .opponentBase(Base.of(enemyBaseLocation, false, myBaseX != 0))
                 .build();
         return new Game(state);
     }

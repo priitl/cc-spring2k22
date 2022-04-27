@@ -17,6 +17,7 @@ public class Base {
     public static final int VISION_RADIUS = 6000;
     final Point location;
     final boolean isMine;
+    final boolean isBlueBase;
     int health = 3;
     int mana = 0;
     List<Monster> endangeringMonsters;

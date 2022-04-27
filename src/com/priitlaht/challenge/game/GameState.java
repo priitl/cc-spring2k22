@@ -89,7 +89,7 @@ public class GameState {
     }
 
     private Hero toHero(Game.RoundInfo.EntityInfo entity) {
-        Point base = myBase.location();
+        boolean blueBase = myBase.isBlueBase();
         Hero.HeroBuilder<?, ?> heroBuilder = Hero.builder()
                 .id(entity.id())
                 .location(Point.of(entity.x(), entity.y()))
@@ -98,13 +98,13 @@ public class GameState {
 
         switch (heroes().size()) {
             case 0:
-                heroBuilder.type(Hero.Type.HARASSER).strategy(DefenderStrategy.of()).origin(Point.of(Math.abs(base.x() - 11000), Math.abs(base.y() - 4500)));
+                heroBuilder.type(Hero.Type.HARASSER).strategy(DefenderStrategy.of()).origin(Point.of(blueBase ? 11000 : 6630, 4500));
                 break;
             case 1:
-                heroBuilder.type(Hero.Type.DEFENDER).strategy(DefenderStrategy.of()).origin(Point.of(Math.abs(base.x() - 7200), Math.abs(base.y() - 2200)));
+                heroBuilder.type(Hero.Type.DEFENDER).strategy(DefenderStrategy.of()).origin(Point.of(blueBase ? 7200 : 10430, blueBase ? 2200 : 7800));
                 break;
             case 2:
-                heroBuilder.type(Hero.Type.DEFENDER).strategy(DefenderStrategy.of()).origin(Point.of(Math.abs(base.x() - 4000), Math.abs(base.y() - 7800)));
+                heroBuilder.type(Hero.Type.DEFENDER).strategy(DefenderStrategy.of()).origin(Point.of(blueBase ? 4000 : 13630, blueBase ? 7800 : 2200));
                 break;
         }
         return heroBuilder.build();
