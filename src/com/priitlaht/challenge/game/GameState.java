@@ -1,6 +1,9 @@
 package com.priitlaht.challenge.game;
 
 import com.priitlaht.challenge.game.model.*;
+import com.priitlaht.challenge.game.strategy.DefenderStrategy;
+import com.priitlaht.challenge.game.strategy.HarasserStrategy;
+import com.priitlaht.challenge.game.strategy.JunglerStrategy;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,12 +39,13 @@ public class GameState {
         roundInfo.entityInfos().forEach(entity -> updateEntityState(entity, previousRoundMonsterAssignments.get(entity.id())));
         myBase.updateEndangeringMonsters(visibleMonsters);
         opponentBase.updateEndangeringMonsters(visibleMonsters);
+        visibleMonsters.forEach(monster -> monster.updateClosestHeroes(heroes));
     }
 
     private void updateEntityState(Game.RoundInfo.EntityInfo entity, Integer assignedHeroId) {
         switch (Game.RoundInfo.EntityInfo.Type.getByValue(entity.type())) {
             case MONSTER:
-                visibleMonsters.add(toMonster(entity));
+                visibleMonsters.add(toMonster(entity, assignedHeroId));
                 break;
             case HERO:
                 if (round == 1) {
@@ -56,7 +60,11 @@ public class GameState {
         }
     }
 
-    private Monster toMonster(Game.RoundInfo.EntityInfo entity) {
+    public Hero heroByType(Hero.Type type) {
+        return heroes.stream().filter(hero -> hero.type() == type).findFirst().orElse(heroes.get(0));
+    }
+
+    private Monster toMonster(Game.RoundInfo.EntityInfo entity, Integer assignedHeroId) {
         return Monster.builder()
                 .id(entity.id())
                 .location(Point.of(entity.x(), entity.y()))
@@ -66,6 +74,7 @@ public class GameState {
                 .velocity(Point.of(entity.vx(), entity.vy()))
                 .target(Monster.Target.getByValue(entity.nearBase()))
                 .threat(Monster.Threat.getByValue(entity.threatFor()))
+                .assignedHeroId(assignedHeroId)
                 .build();
     }
 
@@ -79,13 +88,22 @@ public class GameState {
     }
 
     private Hero toHero(Game.RoundInfo.EntityInfo entity) {
-        return Hero.builder()
+        Hero.HeroBuilder<?, ?> heroBuilder = Hero.builder()
                 .id(entity.id())
-                .origin(myBase.location().subtractAbs(Hero.ORIGINS[heroes.size()]))
-                .type(Hero.TYPES[heroes.size()])
                 .location(Point.of(entity.x(), entity.y()))
                 .shieldLife(entity.shieldLife())
-                .isControlled(entity.isControlled())
-                .build();
+                .isControlled(entity.isControlled());
+        switch (heroes().size()) {
+            case 0:
+                heroBuilder.type(Hero.Type.HARASSER).strategy(HarasserStrategy.of());
+                break;
+            case 1:
+                heroBuilder.type(Hero.Type.DEFENDER).strategy(DefenderStrategy.of());
+                break;
+            case 2:
+                heroBuilder.type(Hero.Type.JUNGLER).strategy(JunglerStrategy.of());
+                break;
+        }
+        return heroBuilder.build();
     }
 }

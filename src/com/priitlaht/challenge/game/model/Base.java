@@ -34,16 +34,15 @@ public class Base {
         this.mana = mana;
     }
 
-    public void castSpell() {
-        this.mana = this.mana - GameConstants.SPELL_MANA_COST;
+    public void useMana(int mana) {
+        this.mana -= mana;
     }
 
     public void updateEndangeringMonsters(List<Monster> visibleMonsters) {
         endangeringMonsters = visibleMonsters.stream()
                 .filter(monster -> monster.isTargetingBase(this) && monster.isThreateningBase(this))
-                .sorted(Comparator.comparing(monster -> monster.nextDistance(location)))
+                .sorted(Comparator.comparing(monster -> monster.distance(location)))
                 .collect(Collectors.toList());
     }
-
 
 }

@@ -1,5 +1,6 @@
 package com.priitlaht.challenge.game.command;
 
+import com.priitlaht.challenge.game.GameConstants;
 import com.priitlaht.challenge.game.model.Point;
 import lombok.Value;
 
@@ -13,5 +14,10 @@ public class ControlCommand implements Command {
     @Override
     public void execute() {
         System.out.printf("SPELL CONTROL %d %d %d%n", entityId, target.x(), target.y());
+    }
+
+    @Override
+    public int manaCost() {
+        return GameConstants.SPELL_MANA_COST;
     }
 }

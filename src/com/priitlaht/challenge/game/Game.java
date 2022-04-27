@@ -1,9 +1,8 @@
 package com.priitlaht.challenge.game;
 
+import com.priitlaht.challenge.game.command.Command;
 import com.priitlaht.challenge.game.model.Base;
 import com.priitlaht.challenge.game.model.Point;
-import com.priitlaht.challenge.game.strategy.DefaultStrategy;
-import com.priitlaht.challenge.game.strategy.Strategy;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,7 +14,6 @@ import java.util.List;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class Game {
     GameState state;
-    Strategy strategy = new DefaultStrategy();
 
     public static Game of(int myBaseX, int myBaseY) {
         Point myBaseLocation = Point.of(myBaseX, myBaseY);
@@ -31,7 +29,11 @@ public class Game {
 
     public void playRound(RoundInfo roundInfo) {
         state.update(roundInfo);
-        this.strategy.play(state);
+        state.heroes().forEach(hero -> {
+            Command command = hero.resolveCommand(state);
+            command.execute();
+            state.myBase().useMana(command.manaCost());
+        });
     }
 
     @Getter

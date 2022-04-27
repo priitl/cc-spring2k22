@@ -7,6 +7,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 @Getter
 @SuperBuilder
@@ -20,25 +22,15 @@ public class Monster extends Entity {
     Target target;
     Threat threat;
     Integer assignedHeroId;
+    Integer closestOffensiveHeroId;
+    Integer closestDefensiveHeroId;
 
     public Point nextLocation() {
         return this.location().add(velocity);
     }
 
-    public int nextDistance(Entity other) {
-        return this.nextLocation().distance(other.location);
-    }
-
-    public int nextDistance(Point point) {
-        return this.nextLocation().distance(point);
-    }
-
     public boolean hasHeroAssigned() {
         return this.assignedHeroId != null;
-    }
-
-    public boolean hasNoHeroAssignedOrAssignedTo(int heroId) {
-        return !hasHeroAssigned() || assignedHeroId == heroId;
     }
 
     public void assignHero(int heroId) {
@@ -52,6 +44,15 @@ public class Monster extends Entity {
 
     public boolean isThreateningBase(Base base) {
         return this.threat() == (base.isMine() ? Monster.Threat.MY_BASE : Monster.Threat.OPPONENT_BASE);
+    }
+
+    public void updateClosestHeroes(List<Hero> heroes) {
+        closestDefensiveHeroId = heroes.stream()
+                .filter(hero -> hero.type() != Hero.Type.HARASSER)
+                .min(Comparator.comparing(this::distance)).map(Hero::id).orElse(null);
+        closestOffensiveHeroId = heroes.stream()
+                .filter(hero -> hero.type() != Hero.Type.DEFENDER)
+                .min(Comparator.comparing(this::distance)).map(Hero::id).orElse(null);
     }
 
     @RequiredArgsConstructor

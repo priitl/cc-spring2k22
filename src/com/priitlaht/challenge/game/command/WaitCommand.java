@@ -8,4 +8,9 @@ public class WaitCommand implements Command {
     public void execute() {
         System.out.println("WAIT");
     }
+
+    @Override
+    public int manaCost() {
+        return 0;
+    }
 }

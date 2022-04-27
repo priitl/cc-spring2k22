@@ -11,4 +11,9 @@ public class MoveCommand implements Command {
     public void execute() {
         System.out.printf("MOVE %d %d%n", target.x(), target.y());
     }
+
+    @Override
+    public int manaCost() {
+        return 0;
+    }
 }
