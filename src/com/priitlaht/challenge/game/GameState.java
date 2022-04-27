@@ -98,7 +98,7 @@ public class GameState {
 
         switch (heroes().size()) {
             case 0:
-                heroBuilder.type(Hero.Type.HARASSER).strategy(DefenderStrategy.of()).origin(Point.of(blueBase ? 11000 : 6630, 4500));
+                heroBuilder.type(Hero.Type.HARASSER).strategy(DefenderStrategy.of()).origin(Point.of(8815, blueBase ? 5300 : 3700));
                 break;
             case 1:
                 heroBuilder.type(Hero.Type.DEFENDER).strategy(DefenderStrategy.of()).origin(Point.of(blueBase ? 7200 : 10430, blueBase ? 2200 : 7800));

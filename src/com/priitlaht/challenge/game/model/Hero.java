@@ -34,7 +34,7 @@ public class Hero extends Entity {
     public void updateStrategy(GameState state) {
         if (state.round() == GameState.Phase.MID.startingRound() && type == Type.HARASSER) {
             this.strategy = HarasserStrategy.of();
-            this.origin = Point.of(13800, 5200);
+            this.origin = Point.of(state.myBase().isBlueBase() ? 13630 : 4000, 4500);
         }
     }
 

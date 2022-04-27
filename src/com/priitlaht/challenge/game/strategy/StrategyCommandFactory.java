@@ -27,19 +27,20 @@ public class StrategyCommandFactory {
         Base myBase = state.myBase();
         if (myBase.isInDanger()) {
             return closestEndangeringMonster(hero, myBase).map(monster -> {
-                monster.assignHero(hero.id());
                 int distanceFromHero = monster.distance(hero);
                 int distanceFromBase = monster.distance(myBase.location());
                 boolean canKillBeforeBase = distanceFromHero <= Hero.DAMAGE_RADIUS && distanceFromBase > (monster.health() - Hero.DAMAGE) * Monster.DISTANCE_PER_TURN;
                 if (!canKillBeforeBase && myBase.hasEnoughManaForSpells() && !monster.isShielded() && monster.isTargetingBase(state.myBase())
                         && distanceFromBase <= Monster.BASE_TARGET_RADIUS - WindCommand.FORCE
                         && distanceFromHero <= WindCommand.RADIUS) {
+                    monster.assignHero(hero.id());
                     return WindCommand.of(state.opponentBase().location());
                 }
                 int shieldDistance = Monster.DISTANCE_PER_TURN * monster.shieldLife();
                 if (shieldDistance > distanceFromBase) {
                     return null;
                 }
+                monster.assignHero(hero.id());
                 return MoveCommand.of(monster.nextLocation());
             });
         }
@@ -49,7 +50,8 @@ public class StrategyCommandFactory {
     public Optional<Command> shieldClosestHero(Hero hero, GameState state) {
         if (state.phase() != GameState.Phase.START) {
             return state.heroes().stream().filter(other -> !other.isShielded() && state.myBase().mana() > 20 && other.distance(hero) <= ShieldCommand.RADIUS
-                            && state.visibleEnemies().stream().anyMatch(enemy -> enemy.distance(other) <= ControlCommand.RADIUS + Hero.DAMAGE_RADIUS))
+                            && state.visibleEnemies().stream().anyMatch(enemy -> enemy.distance(other) <= ControlCommand.RADIUS + Hero.DAMAGE_RADIUS)
+                            && closestEndangeringMonster(hero, state.myBase()).filter(monster -> monster.distance(state.myBase().location()) > Hero.DAMAGE_RADIUS).isPresent())
                     .min(Comparator.comparing(other -> other.distance(hero)))
                     .map(other -> {
                         other.shield();
@@ -95,12 +97,11 @@ public class StrategyCommandFactory {
     }
 
     public Optional<Command> harassEnemyBase(Hero hero, GameState state) {
-        //TODO: control enemy heroes and move closer to base if there are multiple monsters
         if (state.phase() != GameState.Phase.START && hero.distance(state.opponentBase().location()) < Base.VISION_RADIUS * 1.3) {
             List<Monster> windableMonsters = state.visibleMonsters().stream()
-                    .filter(monster -> !monster.isShielded() && monster.isTargetingBase(state.opponentBase())
+                    .filter(monster -> !monster.isShielded() && monster.isThreateningBase(state.opponentBase())
                             && state.myBase().mana() > 20 && monster.distance(hero) <= WindCommand.RADIUS
-                            && monster.distance(state.opponentBase().location()) <= Monster.DISTANCE_PER_TURN * monster.health())
+                            && monster.distance(state.opponentBase().location()) <= Monster.DISTANCE_PER_TURN * monster.health() + WindCommand.RADIUS)
                     .collect(Collectors.toList());
             if (windableMonsters.size() > 2) {
                 windableMonsters.forEach(monster -> monster.assignHero(hero.id()));
@@ -108,7 +109,8 @@ public class StrategyCommandFactory {
             }
             Optional<Command> shieldCommand = state.visibleMonsters().stream()
                     .filter(monster -> !monster.isShielded() && monster.isThreateningBase(state.opponentBase())
-                            && monster.distance(state.opponentBase().location()) <= Monster.DISTANCE_PER_TURN * monster.health()
+                            && monster.health() >= 12
+                            && monster.distance(state.opponentBase().location()) <= Monster.DISTANCE_PER_TURN * monster.health() / 2
                             && state.myBase().mana() > 20 && monster.distance(hero) <= ShieldCommand.RADIUS)
                     .min(Comparator.comparing(monster -> monster.distance(state.opponentBase().location())))
                     .map(monster -> {
@@ -156,9 +158,12 @@ public class StrategyCommandFactory {
     public Optional<Command> getRidOfEnemyCommand(Hero hero, GameState state) {
         if (state.phase() != GameState.Phase.START) {
             return state.visibleEnemies().stream()
-                    .filter(enemy -> !enemy.isShielded() && state.myBase().mana() > 50 && enemy.distance(hero) <= ControlCommand.RADIUS)
+                    .filter(enemy -> !enemy.isShielded() && !enemy.isControlled() && enemy.distance(state.myBase().location()) <= Base.VISION_RADIUS * 1.2)
                     .min(Comparator.comparing(enemy -> enemy.distance(hero)))
                     .map(enemy -> {
+                        if (enemy.distance(hero) > ControlCommand.RADIUS) {
+                            return MoveCommand.of(enemy.location());
+                        }
                         Point target = Point.of(GameConstants.FIELD_WIDTH / 2, state.myBase().location().y());
                         if (enemy.distance(hero) <= WindCommand.RADIUS) {
                             return WindCommand.of(target);
@@ -166,6 +171,36 @@ public class StrategyCommandFactory {
                         enemy.control();
                         return ControlCommand.of(enemy.id(), target);
                     });
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Command> score(Hero hero, GameState state) {
+        Point opponentBase = state.opponentBase().location();
+        if (hero.distance(opponentBase) < hero.distance(state.myBase().location())) {
+            List<Monster> potentialTargets = state.opponentBase().endangeringMonsters().stream()
+                    .filter(monster -> monster.health() >= 12 && !monster.isShielded() && monster.distance(opponentBase) < Base.VISION_RADIUS * 1.1).collect(Collectors.toList());
+            if (potentialTargets.isEmpty()) {
+                return Optional.empty();
+            }
+            Optional<Monster> closestMonsterToHero = potentialTargets.stream().min(Comparator.comparing(m -> m.distance(hero)));
+            int closestMonsterToHeroDistance = closestMonsterToHero.map(m -> m.distance(hero)).orElse(0);
+            if (closestMonsterToHeroDistance > ShieldCommand.RADIUS || !state.myBase().hasEnoughManaForSpells()) {
+                return Optional.of(MoveCommand.of(opponentBase));
+            }
+            Optional<Monster> closestMonsterToBase = potentialTargets.stream().min(Comparator.comparing(m -> m.distance(opponentBase)));
+            int closestMonsterToBaseDistanceToHero = closestMonsterToBase.map(m -> m.distance(hero)).orElse(0);
+            if (closestMonsterToBaseDistanceToHero < WindCommand.RADIUS) {
+                return Optional.of(WindCommand.of(opponentBase));
+            }
+            if (closestMonsterToBaseDistanceToHero < ShieldCommand.RADIUS && closestMonsterToBase.get().distance(opponentBase) < 3000) {
+                return Optional.of(ShieldCommand.of(closestMonsterToBase.get().id()));
+            }
+            if (closestMonsterToHeroDistance < WindCommand.RADIUS) {
+                return Optional.of(WindCommand.of(opponentBase));
+            } else {
+                return Optional.of(MoveCommand.of(closestMonsterToHero.get().nextLocation()));
+            }
         }
         return Optional.empty();
     }
@@ -180,8 +215,9 @@ public class StrategyCommandFactory {
                 return Optional.empty();
             }
             Point centerOfMass = Point.centerOfMass(monsterNextLocations);
-            Point target = state.opponentBase().location().subtractAbs(centerOfMass.add(Point.of(Hero.DAMAGE_RADIUS + 1, Hero.DAMAGE_RADIUS + 1)));
-            return Optional.of(MoveCommand.of(target));
+            if (hero.distance(centerOfMass) < Hero.DAMAGE_RADIUS) {
+                return Optional.of(MoveCommand.of(centerOfMass));
+            }
         }
         return Optional.empty();
     }

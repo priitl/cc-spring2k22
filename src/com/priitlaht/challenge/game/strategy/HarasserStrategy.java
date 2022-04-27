@@ -11,6 +11,10 @@ import java.util.Optional;
 public class HarasserStrategy extends Strategy {
     @Override
     public Command resolve(Hero hero, GameState state) {
+        Optional<Command> scoreCommand = commandFactory.score(hero, state);
+        if (scoreCommand.isPresent()) {
+            return scoreCommand.get();
+        }
         Optional<Command> windCommand = commandFactory.windMonsters(hero, state);
         if (windCommand.isPresent()) {
             return windCommand.get();
