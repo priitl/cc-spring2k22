@@ -2,11 +2,10 @@ package com.priitlaht.challenge.game;
 
 import com.priitlaht.challenge.game.model.*;
 import com.priitlaht.challenge.game.strategy.DefenderStrategy;
-import com.priitlaht.challenge.game.strategy.HarasserStrategy;
-import com.priitlaht.challenge.game.strategy.JunglerStrategy;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
@@ -25,6 +24,7 @@ public class GameState {
     final List<Enemy> visibleEnemies = new ArrayList<>(3);
     final List<Monster> visibleMonsters = new ArrayList<>();
     final Map<Integer, Integer> heroAssignments = new HashMap<>();
+    Phase phase;
     int round;
 
     public void update(Game.RoundInfo roundInfo) {
@@ -32,6 +32,7 @@ public class GameState {
                 .filter(Monster::hasHeroAssigned)
                 .collect(Collectors.toMap(Monster::id, Monster::assignedHeroId));
         round++;
+        phase = round < Phase.MID.startingRound ? Phase.START : round < Phase.LATE.startingRound ? Phase.MID : Phase.LATE;
         visibleMonsters.clear();
         visibleEnemies.clear();
         myBase.update(roundInfo.myBaseHealth(), roundInfo.myBaseMana());
@@ -88,22 +89,31 @@ public class GameState {
     }
 
     private Hero toHero(Game.RoundInfo.EntityInfo entity) {
+        Point base = myBase.location();
         Hero.HeroBuilder<?, ?> heroBuilder = Hero.builder()
                 .id(entity.id())
                 .location(Point.of(entity.x(), entity.y()))
                 .shieldLife(entity.shieldLife())
                 .isControlled(entity.isControlled());
+
         switch (heroes().size()) {
             case 0:
-                heroBuilder.type(Hero.Type.HARASSER).strategy(HarasserStrategy.of());
+                heroBuilder.type(Hero.Type.HARASSER).strategy(DefenderStrategy.of()).origin(Point.of(Math.abs(base.x() - 11000), Math.abs(base.y() - 4500)));
                 break;
             case 1:
-                heroBuilder.type(Hero.Type.DEFENDER).strategy(DefenderStrategy.of());
+                heroBuilder.type(Hero.Type.DEFENDER).strategy(DefenderStrategy.of()).origin(Point.of(Math.abs(base.x() - 7200), Math.abs(base.y() - 2200)));
                 break;
             case 2:
-                heroBuilder.type(Hero.Type.JUNGLER).strategy(JunglerStrategy.of());
+                heroBuilder.type(Hero.Type.DEFENDER).strategy(DefenderStrategy.of()).origin(Point.of(Math.abs(base.x() - 4000), Math.abs(base.y() - 7800)));
                 break;
         }
         return heroBuilder.build();
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public enum Phase {
+        START(0), MID(95), LATE(150);
+        final int startingRound;
     }
 }

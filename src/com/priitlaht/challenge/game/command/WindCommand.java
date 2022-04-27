@@ -7,6 +7,7 @@ import lombok.Value;
 @Value(staticConstructor = "of")
 public class WindCommand implements Command {
     public static final int RADIUS = 1280;
+    public static final int FORCE = 2200;
     Point target;
 
     @Override

@@ -30,6 +30,7 @@ public class Game {
     public void playRound(RoundInfo roundInfo) {
         state.update(roundInfo);
         state.heroes().forEach(hero -> {
+            hero.updateStrategy(state);
             Command command = hero.resolveCommand(state);
             command.execute();
             state.myBase().useMana(command.manaCost());

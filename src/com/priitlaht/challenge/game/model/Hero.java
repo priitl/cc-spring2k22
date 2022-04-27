@@ -2,6 +2,7 @@ package com.priitlaht.challenge.game.model;
 
 import com.priitlaht.challenge.game.GameState;
 import com.priitlaht.challenge.game.command.Command;
+import com.priitlaht.challenge.game.strategy.HarasserStrategy;
 import com.priitlaht.challenge.game.strategy.Strategy;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,36 +10,36 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Objects;
+
 @Getter
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Hero extends Entity {
-    public static final int DAMAGE_RADIUS = 300;
+    public static final int DAMAGE_RADIUS = 800;
     public static final int VISION_RADIUS = 2200;
+    public static final int DAMAGE = 2;
     Type type;
     Strategy strategy;
-
-    public Point origin() {
-        return type.origin;
-    }
+    Point origin;
 
     public Command resolveCommand(GameState state) {
         return strategy.resolve(this, state);
     }
 
-    public boolean isBestOffensiveFor(Monster monster) {
-        return !monster.hasHeroAssigned() || monster.assignedHeroId() == this.id || monster.closestOffensiveHeroId() == this.id;
+    public boolean isAssignedOrClosestTo(Monster monster) {
+        return Objects.equals(monster.assignedHeroId(), this.id) || (!monster.hasHeroAssigned() && Objects.equals(monster.closestHeroId(), this.id));
     }
 
-    public boolean isBestDefensiveFor(Monster monster) {
-        return !monster.hasHeroAssigned() || monster.assignedHeroId() == this.id || monster.closestDefensiveHeroId() == this.id;
+    public void updateStrategy(GameState state) {
+        if (state.round() == GameState.Phase.MID.startingRound() && type == Type.HARASSER) {
+            this.strategy = HarasserStrategy.of();
+            this.origin = Point.of(13800, 5200);
+        }
     }
 
     @RequiredArgsConstructor
     public enum Type {
-        HARASSER(Point.of(13800, 5200)),
-        DEFENDER(Point.of(7200, 2200)),
-        JUNGLER(Point.of(4000, 7800));
-        final Point origin;
+        HARASSER, DEFENDER, JUNGLER;
     }
 }

@@ -22,7 +22,7 @@ public class Monster extends Entity {
     Target target;
     Threat threat;
     Integer assignedHeroId;
-    Integer closestOffensiveHeroId;
+    Integer closestHeroId;
     Integer closestDefensiveHeroId;
 
     public Point nextLocation() {
@@ -47,12 +47,7 @@ public class Monster extends Entity {
     }
 
     public void updateClosestHeroes(List<Hero> heroes) {
-        closestDefensiveHeroId = heroes.stream()
-                .filter(hero -> hero.type() != Hero.Type.HARASSER)
-                .min(Comparator.comparing(this::distance)).map(Hero::id).orElse(null);
-        closestOffensiveHeroId = heroes.stream()
-                .filter(hero -> hero.type() != Hero.Type.DEFENDER)
-                .min(Comparator.comparing(this::distance)).map(Hero::id).orElse(null);
+        closestHeroId = heroes.stream().min(Comparator.comparing(this::distance)).map(Hero::id).orElse(null);
     }
 
     @RequiredArgsConstructor
