@@ -175,6 +175,7 @@ public class StrategyCommandFactory {
         return Optional.empty();
     }
 
+    // TODO: resolve mana issues, improve directing monsters to base + avoid contact with monsters
     public Optional<Command> score(Hero hero, GameState state) {
         Point opponentBase = state.opponentBase().location();
         if (hero.distance(opponentBase) < hero.distance(state.myBase().location())) {
