@@ -1,6 +1,5 @@
 package com.priitlaht.challenge.game;
 
-import com.priitlaht.challenge.game.command.Command;
 import com.priitlaht.challenge.game.model.Base;
 import com.priitlaht.challenge.game.model.Point;
 import lombok.*;
@@ -29,12 +28,7 @@ public class Game {
 
     public void playRound(RoundInfo roundInfo) {
         state.update(roundInfo);
-        state.heroes().forEach(hero -> {
-            hero.updateStrategy(state);
-            Command command = hero.resolveCommand(state);
-            command.execute();
-            state.myBase().useMana(command.manaCost());
-        });
+        state.heroes().forEach(hero -> hero.playRound(state));
     }
 
     @Getter

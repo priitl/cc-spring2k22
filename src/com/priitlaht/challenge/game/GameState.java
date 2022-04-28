@@ -94,7 +94,8 @@ public class GameState {
                 .id(entity.id())
                 .location(Point.of(entity.x(), entity.y()))
                 .shieldLife(entity.shieldLife())
-                .isControlled(entity.isControlled());
+                .isControlled(entity.isControlled())
+                .base(myBase);
 
         switch (heroes().size()) {
             case 0:

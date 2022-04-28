@@ -21,20 +21,9 @@ public class Monster extends Entity {
     Point velocity;
     Target target;
     Threat threat;
-    Integer assignedHeroId;
-    Integer closestHeroId;
-    Integer closestDefensiveHeroId;
 
     public Point nextLocation() {
         return this.location().add(velocity);
-    }
-
-    public boolean hasHeroAssigned() {
-        return this.assignedHeroId != null;
-    }
-
-    public void assignHero(int heroId) {
-        this.assignedHeroId = heroId;
     }
 
     public boolean isTargetingBase(Base base) {

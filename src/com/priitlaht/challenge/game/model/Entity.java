@@ -13,6 +13,9 @@ public abstract class Entity {
     Point location;
     int shieldLife;
     boolean isControlled;
+    Integer assignedHeroId;
+    Integer closestHeroId;
+    Integer closestDefensiveHeroId;
 
     public void update(Point location, int shieldLife, boolean isControlled) {
         this.location = location;
@@ -20,16 +23,12 @@ public abstract class Entity {
         this.isControlled = isControlled;
     }
 
-    public boolean isShielded() {
-        return shieldLife > 0;
+    public boolean hasHeroAssigned() {
+        return this.assignedHeroId != null;
     }
 
-    public void shield() {
-        this.shieldLife = 12;
-    }
-
-    public void control() {
-        this.isControlled = true;
+    public boolean isUnshielded() {
+        return shieldLife <= 0;
     }
 
     public int distance(Entity other) {
