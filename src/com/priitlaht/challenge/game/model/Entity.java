@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Objects;
+
 @Getter
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PACKAGE)
@@ -25,6 +27,10 @@ public abstract class Entity {
 
     public boolean hasHeroAssigned() {
         return this.assignedHeroId != null;
+    }
+
+    public boolean isAtLocation(Point location) {
+        return Objects.equals(this.location, location);
     }
 
     public boolean isUnshielded() {

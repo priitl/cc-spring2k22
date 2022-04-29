@@ -7,8 +7,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 
 @Getter
 @SuperBuilder
@@ -35,7 +35,7 @@ public class Monster extends Entity {
         return this.threat() == (base.isMine() ? Monster.Threat.MY_BASE : Monster.Threat.OPPONENT_BASE);
     }
 
-    public void updateClosestHeroes(List<Hero> heroes) {
+    public void updateClosestHeroes(Collection<Hero> heroes) {
         closestHeroId = heroes.stream().min(Comparator.comparing(this::distance)).map(Hero::id).orElse(null);
     }
 

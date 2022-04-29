@@ -2,8 +2,7 @@ package com.priitlaht.challenge.game.model;
 
 import com.priitlaht.challenge.game.GameConstants;
 import com.priitlaht.challenge.game.GameState;
-import com.priitlaht.challenge.game.strategy.HarasserStrategy;
-import com.priitlaht.challenge.game.strategy.Strategy;
+import com.priitlaht.challenge.game.strategy.engine.Routine;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,19 +19,25 @@ public class Hero extends Entity {
     public static final int VISION_RADIUS = 2200;
     public static final int DAMAGE = 2;
     Type type;
-    Strategy strategy;
+    Routine routine;
     Point origin;
-    Base base;
     boolean actionPerformed;
 
-    public void playRound(GameState state) {
+    public void playRound() {
         this.actionPerformed = false;
-        if (state.round() == GameState.Phase.MID.startingRound() && type == Type.HARASSER) {
-            this.strategy = HarasserStrategy.of();
-            this.origin = Point.of(state.myBase().isBlueBase() ? 13630 : 4000, 4500);
+        if (GameState.instance().round() == GameState.Phase.MID.startingRound() && type == Type.HARASSER) {
+            this.origin = GameState.instance().myBase().location().subtractAbs(Point.of(13630, 4500));
         }
-        strategy.play(this, state);
+        if (routine.isIdle()) {
+            routine.start();
+        }
+        routine.play(this.id);
     }
+
+    public boolean isAtOrigin() {
+        return Objects.equals(this.location, this.origin);
+    }
+
 
     public boolean isAssignedOrClosestTo(Monster monster) {
         return Objects.equals(monster.assignedHeroId(), this.id) || (!monster.hasHeroAssigned() && Objects.equals(monster.closestHeroId(), this.id));
@@ -42,20 +47,20 @@ public class Hero extends Entity {
         this.actionPerformed = true;
         entity.isControlled = true;
         entity.assignedHeroId = this.id; // TODO: should this be here?
-        base.useMana(GameConstants.SPELL_MANA_COST);
+        GameState.instance().myBase().useMana(GameConstants.SPELL_MANA_COST);
         System.out.printf("SPELL CONTROL %d %d %d%n", entity.id(), target.x(), target.y());
     }
 
     public void wind(Point target) {
         this.actionPerformed = true;
-        base.useMana(GameConstants.SPELL_MANA_COST);
+        GameState.instance().myBase().useMana(GameConstants.SPELL_MANA_COST);
         System.out.printf("SPELL WIND %d %d%n", target.x(), target.y());
     }
 
     public void shield(Entity entity) {
         this.actionPerformed = true;
         entity.shieldLife = GameConstants.MAX_SHIELD_LIFE;
-        base.useMana(GameConstants.SPELL_MANA_COST);
+        GameState.instance().myBase().useMana(GameConstants.SPELL_MANA_COST);
         System.out.printf("SPELL SHIELD %d%n", entity.id());
     }
 
@@ -65,7 +70,11 @@ public class Hero extends Entity {
         System.out.printf("MOVE %d %d%n", monster.nextLocation().x(), monster.nextLocation().y());
     }
 
-    public void move(Point target) {
+    public void moveToOrigin() {
+        moveTo(origin);
+    }
+
+    public void moveTo(Point target) {
         this.actionPerformed = true;
         System.out.printf("MOVE %d %d%n", target.x(), target.y());
     }
