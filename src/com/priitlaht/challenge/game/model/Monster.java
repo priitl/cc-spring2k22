@@ -22,10 +22,6 @@ public class Monster extends Entity {
     Target target;
     Threat threat;
 
-    public Point nextLocation() {
-        return this.location().add(velocity);
-    }
-
     public boolean isTargetingBase(Base base) {
         return this.target() == Monster.Target.BASE
                 && this.threat() == (base.isMine() ? Monster.Threat.MY_BASE : Monster.Threat.OPPONENT_BASE);

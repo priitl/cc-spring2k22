@@ -9,18 +9,18 @@ import java.util.List;
 import java.util.Queue;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FallbackNode extends Routine {
-    private Routine currentRoutine;
-    private final List<Routine> routines = new LinkedList<>();
-    private final Queue<Routine> routineQueue = new LinkedList<>();
+public class Fallback extends Routine {
+    protected Routine currentRoutine;
+    protected final List<Routine> routines = new LinkedList<>();
+    protected final Queue<Routine> routineQueue = new LinkedList<>();
 
-    public static Routine selector(Routine... routines) {
-        FallbackNode selector = new FallbackNode();
+    public static Routine of(Routine... routines) {
+        Fallback selector = new Fallback();
         Arrays.stream(routines).forEach(selector::addRoutine);
         return selector;
     }
 
-    public FallbackNode addRoutine(Routine routine) {
+    public Fallback addRoutine(Routine routine) {
         routines.add(routine);
         return this;
     }
@@ -39,26 +39,18 @@ public class FallbackNode extends Routine {
     @Override
     public void play(int heroId) {
         currentRoutine.play(heroId);
-        if (currentRoutine.isRunning()) {
+        if (currentRoutine.succeeded() || routineQueue.peek() == null) {
+            updateStatus(currentRoutine.status);
             return;
         }
-
-        if (currentRoutine.succeeded()) {
-            succeed();
-            return;
-        }
-
-        if (routineQueue.peek() == null) {
-            this.status = currentRoutine.status;
-        } else {
-            currentRoutine = routineQueue.poll();
-            currentRoutine.start();
-            currentRoutine.play(heroId);
-        }
+        currentRoutine = routineQueue.poll();
+        currentRoutine.start();
+        play(heroId);
     }
 
     @Override
     public void reset() {
         routines.forEach(Routine::reset);
+        this.start();
     }
 }

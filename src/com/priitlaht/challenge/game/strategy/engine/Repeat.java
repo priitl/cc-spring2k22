@@ -3,14 +3,14 @@ package com.priitlaht.challenge.game.strategy.engine;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class RepeatNode extends Routine {
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+public class Repeat extends Routine {
     private final Routine routine;
     private final int times;
     private int timesLeft;
 
-    public static Routine repeat(Routine routine, int times) {
-        RepeatNode repeatNode = new RepeatNode(routine, times);
+    public static Routine of(Routine routine, int times) {
+        Repeat repeatNode = new Repeat(routine, times);
         repeatNode.timesLeft = times;
         return repeatNode;
     }
@@ -23,6 +23,7 @@ public class RepeatNode extends Routine {
 
     @Override
     public void play(int heroId) {
+        routine.play(heroId);
         if (routine.failed()) {
             fail();
         } else if (routine.succeeded()) {
@@ -37,12 +38,13 @@ public class RepeatNode extends Routine {
             }
         }
         if (routine.isRunning()) {
-            routine.play(heroId);
+            play(heroId);
         }
     }
 
     @Override
     public void reset() {
         this.timesLeft = times;
+        this.start();
     }
 }

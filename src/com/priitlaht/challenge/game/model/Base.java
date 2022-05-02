@@ -6,10 +6,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -22,7 +18,6 @@ public class Base {
     Point location;
     int health = 3;
     int mana = 0;
-    List<Monster> endangeringMonsters;
 
     public static Base myBaseInstance() {
         return MY_BASE_INSTANCE;
@@ -30,10 +25,6 @@ public class Base {
 
     public static Base opponentBaseInstance() {
         return OPPONENT_BASE_INSTANCE;
-    }
-
-    public boolean isInDanger() {
-        return !endangeringMonsters.isEmpty();
     }
 
     public boolean hasEnoughManaForSpells() {
@@ -51,12 +42,5 @@ public class Base {
 
     public void useMana(int mana) {
         this.mana -= mana;
-    }
-
-    public void updateEndangeringMonsters(List<Monster> visibleMonsters) {
-        endangeringMonsters = visibleMonsters.stream()
-                .filter(monster -> monster.isTargetingBase(this) && monster.isThreateningBase(this))
-                .sorted(Comparator.comparing(monster -> monster.distance(location)))
-                .collect(Collectors.toList());
     }
 }

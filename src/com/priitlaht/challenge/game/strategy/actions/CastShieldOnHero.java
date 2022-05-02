@@ -6,11 +6,11 @@ import com.priitlaht.challenge.game.strategy.engine.Routine;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(staticName = "of")
-public class MoveToOrigin extends Routine {
+public class CastShieldOnHero extends Routine {
     @Override
     public void play(int heroId) {
         Hero hero = GameState.instance().hero(heroId);
-        hero.moveToOrigin();
+        hero.shield(hero);
         succeed();
     }
 }

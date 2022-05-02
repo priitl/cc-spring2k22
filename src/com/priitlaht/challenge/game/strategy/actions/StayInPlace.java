@@ -9,5 +9,6 @@ public class StayInPlace extends Routine {
     @Override
     public void play(int heroId) {
         GameState.instance().hero(heroId).stayInPlace();
+        succeed();
     }
 }

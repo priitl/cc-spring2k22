@@ -1,7 +1,6 @@
 package com.priitlaht.challenge.game;
 
 import com.priitlaht.challenge.game.model.Hero;
-import com.priitlaht.challenge.game.model.Point;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,9 +14,8 @@ public class Game {
     GameState state;
 
     public static Game of(int myBaseX, int myBaseY) {
-        Point myBaseLocation = Point.of(myBaseX, myBaseY);
-        int enemyBaseX = Math.abs(GameConstants.FIELD_WIDTH - myBaseLocation.x());
-        int enemyBaseY = Math.abs(GameConstants.FIELD_HEIGHT - myBaseLocation.y());
+        int enemyBaseX = Math.abs(GameConstants.FIELD_WIDTH - myBaseX);
+        int enemyBaseY = Math.abs(GameConstants.FIELD_HEIGHT - myBaseY);
         GameState state = GameState.instance();
         state.myBase().location(myBaseX, myBaseY);
         state.opponentBase().location(enemyBaseX, enemyBaseY);
@@ -27,6 +25,7 @@ public class Game {
     public void playRound(RoundInfo roundInfo) {
         state.update(roundInfo);
         state.heroes().values().forEach(Hero::playRound);
+        state.heroes().values().forEach(hero -> System.out.println(hero.action()));
     }
 
     @Getter

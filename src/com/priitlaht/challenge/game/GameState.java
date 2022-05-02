@@ -24,6 +24,7 @@ public class GameState {
     final Base opponentBase = Base.opponentBaseInstance();
     final List<Enemy> visibleEnemies = new ArrayList<>(3);
     final List<Monster> visibleMonsters = new ArrayList<>();
+    final List<Entity> visbleEntities = new ArrayList<>();
     final Map<Integer, Hero> heroes = new HashMap<>(3);
     Phase phase;
     int round;
@@ -36,10 +37,6 @@ public class GameState {
         return heroes.get(heroId);
     }
 
-    public Point heroLocation(int heroId) {
-        return heroes.get(heroId).location();
-    }
-
     public void update(Game.RoundInfo roundInfo) {
         Map<Integer, Integer> previousRoundMonsterAssignments = visibleMonsters.stream()
                 .filter(Monster::hasHeroAssigned)
@@ -48,12 +45,13 @@ public class GameState {
         phase = round < Phase.MID.startingRound ? Phase.START : round < Phase.LATE.startingRound ? Phase.MID : Phase.LATE;
         visibleMonsters.clear();
         visibleEnemies.clear();
+        visbleEntities.clear();
         myBase.update(roundInfo.myBaseHealth(), roundInfo.myBaseMana());
         opponentBase.update(roundInfo.opponentBaseHealth(), roundInfo.opponentBaseHealth());
         roundInfo.entityInfos().forEach(entity -> updateEntityState(entity, previousRoundMonsterAssignments.get(entity.id())));
-        myBase.updateEndangeringMonsters(visibleMonsters);
-        opponentBase.updateEndangeringMonsters(visibleMonsters);
         visibleMonsters.forEach(monster -> monster.updateClosestHeroes(heroes.values()));
+        visbleEntities.addAll(visibleMonsters);
+        visbleEntities.addAll(visibleEnemies);
     }
 
     private void updateEntityState(Game.RoundInfo.EntityInfo entity, Integer assignedHeroId) {
@@ -106,19 +104,16 @@ public class GameState {
         switch (heroes().size()) {
             case 0:
                 heroBuilder
-                        .type(Hero.Type.HARASSER)
                         .routine(DefaultAi.of())
                         .origin(myBase.subtractAbs(Point.of(8815, 5300)));
                 break;
             case 1:
                 heroBuilder
-                        .type(Hero.Type.DEFENDER)
                         .routine(DefaultAi.of())
                         .origin(myBase.subtractAbs(Point.of(7200, 2200)));
                 break;
             case 2:
                 heroBuilder
-                        .type(Hero.Type.DEFENDER)
                         .routine(DefaultAi.of())
                         .origin(myBase.subtractAbs(Point.of(4000, 7800)));
                 break;

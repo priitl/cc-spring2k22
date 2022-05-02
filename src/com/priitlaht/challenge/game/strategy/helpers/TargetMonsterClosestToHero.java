@@ -1,4 +1,4 @@
-package com.priitlaht.challenge.game.strategy.actions;
+package com.priitlaht.challenge.game.strategy.helpers;
 
 import com.priitlaht.challenge.game.GameState;
 import com.priitlaht.challenge.game.model.Hero;
@@ -11,15 +11,17 @@ import java.util.List;
 import java.util.Optional;
 
 @NoArgsConstructor(staticName = "of")
-public class DefendBase extends Routine {
+public class TargetMonsterClosestToHero extends Routine {
     @Override
     public void play(int heroId) {
+        List<Monster> visibleMonsters = GameState.instance().visibleMonsters();
         Hero hero = GameState.instance().hero(heroId);
-        List<Monster> endangeringMonsters = GameState.instance().myBase().endangeringMonsters();
-        Optional<Monster> closestMonster = endangeringMonsters.stream()
+        Optional<Monster> target = visibleMonsters.stream()
+                .filter(hero::isAssignedOrClosestTo)
                 .min(Comparator.comparing(monster -> monster.distance(hero)));
-        if (closestMonster.isPresent()) {
-            hero.moveTo(closestMonster.get().nextLocation());
+        if (target.isPresent()) {
+            hero.updateTarget(target.get());
+            succeed();
         } else {
             fail();
         }

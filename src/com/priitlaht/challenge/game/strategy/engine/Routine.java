@@ -4,16 +4,12 @@ import lombok.Getter;
 
 @Getter
 public abstract class Routine {
-    protected Status status = Status.IDLE;
+    protected Status status;
 
     public abstract void play(int heroId);
 
     public void reset() {
         this.start();
-    }
-
-    public boolean isIdle() {
-        return Status.IDLE == this.status;
     }
 
     public boolean isRunning() {
@@ -49,8 +45,22 @@ public abstract class Routine {
         }
     }
 
+    protected void updateStatus(Status status) {
+        switch (status) {
+            case RUNNING:
+                start();
+                break;
+            case FAILURE:
+                fail();
+                break;
+            case SUCCESS:
+                succeed();
+                break;
+        }
+    }
+
     public enum Status {
-        IDLE, RUNNING, SUCCESS, FAILURE
+        RUNNING, SUCCESS, FAILURE
     }
 
     protected boolean debug() {
