@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -23,9 +22,8 @@ public class Game {
 
     public void playRound(RoundInfo roundInfo) {
         state.update(roundInfo);
-        state.heroes().values().forEach(Hero::playRound);
-        state.heroes().values().forEach(hero ->
-                System.out.printf("%s %s%n", hero.action(), Optional.ofNullable(hero.message()).orElse(hero.role().name())));
+        state.heroes().values().forEach(Hero::resolveAction);
+        state.heroes().values().forEach(Hero::playAction);
     }
 
     @Getter

@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +20,8 @@ public class GameState {
 
     final Base myBase = Base.myBaseInstance();
     final Base opponentBase = Base.opponentBaseInstance();
-    final List<Enemy> visibleEnemies = new ArrayList<>(3);
-    final List<Monster> visibleMonsters = new ArrayList<>();
-    final List<Entity> visbleEntities = new ArrayList<>();
+    final Map<Integer, Enemy> enemies = new HashMap<>(3);
+    final Map<Integer, Monster> monsters = new HashMap<>();
     final Map<Integer, Hero> heroes = new HashMap<>(3);
     int round;
 
@@ -36,78 +34,82 @@ public class GameState {
     }
 
     public void update(Game.RoundInfo roundInfo) {
-        Map<Integer, Integer> previousRoundMonsterAssignments = visibleMonsters.stream()
-                .filter(Monster::hasHeroAssigned)
-                .collect(Collectors.toMap(Monster::id, Monster::assignedHeroId));
-        List<Monster> previousRoundMonsters = new ArrayList<>(visibleMonsters);
         round++;
-        visibleMonsters.clear();
-        visibleEnemies.clear();
-        visbleEntities.clear();
+        enemies.clear(); // TODO: remove
         myBase.update(roundInfo.myBaseHealth(), roundInfo.myBaseMana());
         opponentBase.update(roundInfo.opponentBaseHealth(), roundInfo.opponentBaseHealth());
-        roundInfo.entityInfos().forEach(entity ->
-                updateEntityState(entity, previousRoundMonsterAssignments.get(entity.id()), previousRoundMonsters));
-        visibleMonsters.forEach(monster -> monster.updateClosestHeroes(heroes.values()));
-        visbleEntities.addAll(visibleMonsters);
-        visbleEntities.addAll(visibleEnemies);
+        updateLastRoundMonsters();
+        roundInfo.entityInfos().forEach(this::updateEntityState);
+        monsters.values().forEach(monster -> monster.updateClosestHeroes(heroes.values()));
+    }
+
+    private void updateLastRoundMonsters() {
+        List<Monster> monstersToKeepInPlay = monsters.values().stream()
+                .filter(monster -> isWithinBoundsAndNotSeen(monster, monster.nextLocation()))
+                .map(Monster::moveToNextLocation)
+                .collect(Collectors.toList());
+        monsters.clear();
+        monsters.putAll(monstersToKeepInPlay.stream().collect(Collectors.toMap(Monster::id, monster -> monster)));
     }
 
     // TODO keep previous monsters that are not dead and visible enemy heroes
-    private void updateEntityState(Game.RoundInfo.EntityInfo entity, Integer assignedHeroId, List<Monster> previousRoundMonsters) {
+    private void updateEntityState(Game.RoundInfo.EntityInfo entity) {
         switch (Game.RoundInfo.EntityInfo.Type.getByValue(entity.type())) {
             case MONSTER:
-                Monster monster = toMonster(entity, assignedHeroId);
-                visibleMonsters.remove(monster);
-                visibleMonsters.add(monster);
-                Monster mirroredMonster = monster.mirror();
-                if (!previousRoundMonsters.contains(monster) && !visibleMonsters.contains(mirroredMonster)) {
-                    visibleMonsters.add(mirroredMonster);
-                }
+                addOrUpdateMonsters(entity);
                 break;
             case HERO:
-                if (round == 1) {
-                    heroes.put(entity.id(), toHero(entity));
-                } else {
-                    heroes.get(entity.id()).update(Vector.of(entity.x(), entity.y()), entity.shieldLife(), entity.isControlled());
-                }
+                addOrUpdateHero(entity);
                 break;
             case ENEMY:
-                visibleEnemies.add(toEnemy(entity));
+                addOrUpdateEnemy(entity);
         }
     }
 
-    private Monster toMonster(Game.RoundInfo.EntityInfo entity, Integer assignedHeroId) {
-        return Monster.builder()
+    private void addOrUpdateMonsters(Game.RoundInfo.EntityInfo entity) {
+        Monster.MonsterBuilder<?, ?> builder = monsters.containsKey(entity.id()) ? monsters.get(entity.id()).toBuilder() : Monster.builder();
+        Monster monster = builder
                 .id(entity.id())
-                .position(Vector.of(entity.x(), entity.y()))
+                .location(Vector.of(entity.x(), entity.y()))
                 .shieldDuration(entity.shieldLife())
                 .isControlled(entity.isControlled())
                 .health(entity.health())
-                .velocity(Vector.of(entity.vx(), entity.vy()))
+                .speed(Vector.of(entity.vx(), entity.vy()))
                 .target(Monster.Target.getByValue(entity.nearBase()))
                 .threat(Monster.Threat.getByValue(entity.threatFor()))
-                .assignedHeroId(assignedHeroId)
                 .build();
+        Monster mirroredMonster = monster.mirror();
+        if (!monsters.containsKey(mirroredMonster.id()) && isWithinBoundsAndNotSeen(mirroredMonster, mirroredMonster.location())) {
+            monsters.put(mirroredMonster.id(), mirroredMonster);
+        }
+        monsters.put(entity.id(), monster);
     }
 
-    private Enemy toEnemy(Game.RoundInfo.EntityInfo entity) {
-        return Enemy.builder()
+    private void addOrUpdateEnemy(Game.RoundInfo.EntityInfo entity) {
+        Enemy.EnemyBuilder<?, ?> builder = enemies.containsKey(entity.id()) ? enemies.get(entity.id()).toBuilder() : Enemy.builder();
+        enemies.put(entity.id(), builder
                 .id(entity.id())
-                .position(Vector.of(entity.x(), entity.y()))
+                .location(Vector.of(entity.x(), entity.y()))
                 .shieldDuration(entity.shieldLife())
                 .isControlled(entity.isControlled())
-                .build();
+                .build());
     }
 
-    private Hero toHero(Game.RoundInfo.EntityInfo entity) {
-        return Hero.builder()
+    private void addOrUpdateHero(Game.RoundInfo.EntityInfo entity) {
+        Hero.HeroBuilder<?, ?> builder = round == 1 ? Hero.builder() : heroes.get(entity.id()).toBuilder();
+        heroes.put(entity.id(), builder
                 .id(entity.id())
-                .position(Vector.of(entity.x(), entity.y()))
+                .location(Vector.of(entity.x(), entity.y()))
                 .shieldDuration(entity.shieldLife())
                 .role(Hero.Role.JUNGLER)
                 .isControlled(entity.isControlled())
                 .routine(DefaultAi.of())
-                .build();
+                .build());
+    }
+
+    private boolean isWithinBoundsAndNotSeen(Monster monster, Vector location) {
+        return location.withinBounds(0, 0, GameConstants.FIELD_WIDTH, GameConstants.FIELD_HEIGHT)
+                && monster.distance(myBase.location()) >= GameConstants.BASE_VISION_RADIUS
+                && heroes.values().stream().noneMatch(hero -> hero.distance(location) <= GameConstants.HERO_VISION_RADIUS);
     }
 }

@@ -9,38 +9,24 @@ import lombok.experimental.SuperBuilder;
 import java.util.Objects;
 
 @Getter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PACKAGE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Entity {
     @EqualsAndHashCode.Include
     int id;
-    Vector position;
-    Vector speed;
+    Vector location;
     int shieldDuration;
     boolean isControlled;
     Integer assignedHeroId;
     Integer closestHeroId;
 
-    public void update(Vector location, int shieldDuration, boolean isControlled) {
-        this.position = location;
-        this.shieldDuration = shieldDuration;
-        this.isControlled = isControlled;
-    }
-
     public boolean hasHeroAssigned() {
         return this.assignedHeroId != null;
     }
 
-    public Vector nextLocation() {
-        if (speed == null) {
-            return this.position();
-        }
-        return this.position().add(speed);
-    }
-
     public boolean isAtLocation(Vector location) {
-        return Objects.equals(this.position, location);
+        return Objects.equals(this.location, location);
     }
 
     public boolean isShielded() {
@@ -48,10 +34,10 @@ public class Entity {
     }
 
     public double distance(Entity other) {
-        return this.position.distance(other.position);
+        return this.location.distance(other.location);
     }
 
     public double distance(Vector point) {
-        return this.position.distance(point);
+        return this.location.distance(point);
     }
 }

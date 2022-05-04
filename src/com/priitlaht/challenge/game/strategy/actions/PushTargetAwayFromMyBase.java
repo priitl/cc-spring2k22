@@ -12,7 +12,7 @@ public class PushTargetAwayFromMyBase extends Routine {
     @Override
     public void play(int heroId) {
         Hero hero = GameState.instance().hero(heroId);
-        Vector heroLocation = hero.position();
+        Vector heroLocation = hero.location();
         Vector baseLocation = GameState.instance().myBase().location();
         Vector normalize = heroLocation.subtract(baseLocation).normalize();
         System.err.println(normalize);

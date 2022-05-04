@@ -10,9 +10,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Getter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Hero extends Entity {
     Role role;
@@ -21,12 +22,16 @@ public class Hero extends Entity {
     String message;
     Entity target;
 
-    public void playRound() {
+    public void resolveAction() {
         this.action = null;
         if (routine.status() == null) {
             routine.start();
         }
         routine.play(this.id);
+    }
+
+    public void playAction() {
+        System.out.printf("%s %s%n", action, Optional.ofNullable(message).orElse(role.name()));
     }
 
     public double distanceToTarget() {
@@ -68,7 +73,7 @@ public class Hero extends Entity {
         this.action = String.format("SPELL SHIELD %d", entity.id());
     }
 
-    public void attack(Entity entity) {
+    public void attack(Monster entity) {
         entity.assignedHeroId = this.id;
         this.action = String.format("MOVE %d %d", Math.round(entity.nextLocation().x()), Math.round(entity.nextLocation().y()));
     }

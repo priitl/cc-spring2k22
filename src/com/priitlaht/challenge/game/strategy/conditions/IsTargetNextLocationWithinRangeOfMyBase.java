@@ -1,7 +1,9 @@
 package com.priitlaht.challenge.game.strategy.conditions;
 
 import com.priitlaht.challenge.game.GameState;
+import com.priitlaht.challenge.game.model.Entity;
 import com.priitlaht.challenge.game.model.Hero;
+import com.priitlaht.challenge.game.model.Monster;
 import com.priitlaht.challenge.game.model.Vector;
 import com.priitlaht.challenge.game.strategy.engine.Routine;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +16,9 @@ public class IsTargetNextLocationWithinRangeOfMyBase extends Routine {
     public void play(int heroId) {
         Vector baseLocation = GameState.instance().myBase().location();
         Hero hero = GameState.instance().hero(heroId);
-        if (hero.target() != null && baseLocation.distance(hero.target().nextLocation()) <= range) {
+        Entity target = hero.target();
+        Vector nextLocation = (target instanceof Monster) ? ((Monster) target).nextLocation() : target.location();
+        if (baseLocation.distance(nextLocation) <= range) {
             succeed();
         } else {
             fail();

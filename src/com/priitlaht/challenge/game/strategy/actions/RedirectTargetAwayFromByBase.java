@@ -4,6 +4,7 @@ import com.priitlaht.challenge.game.GameConstants;
 import com.priitlaht.challenge.game.GameState;
 import com.priitlaht.challenge.game.model.Entity;
 import com.priitlaht.challenge.game.model.Hero;
+import com.priitlaht.challenge.game.model.Monster;
 import com.priitlaht.challenge.game.model.Vector;
 import com.priitlaht.challenge.game.strategy.engine.Routine;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ public class RedirectTargetAwayFromByBase extends Routine {
         Hero hero = GameState.instance().hero(heroId);
         Vector baseLocation = GameState.instance().myBase().location();
         Entity target = hero.target();
-        Vector nextLocation = target.nextLocation();
+        Vector nextLocation = (target instanceof Monster) ? ((Monster) target).nextLocation() : target.location();
         Vector monsterVector = nextLocation.subtract(baseLocation).normalize().multiply(GameConstants.MONSTER_DISTANCE_PER_TURN);
         Vector redirectVelocity;
         if (baseLocation.x() == 0) {

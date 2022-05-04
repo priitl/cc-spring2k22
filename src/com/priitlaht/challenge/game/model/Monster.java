@@ -12,19 +12,26 @@ import java.util.Collection;
 import java.util.Comparator;
 
 @Getter
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Monster extends Entity {
     int health;
-    Vector velocity;
+    Vector speed;
     Target target;
     Threat threat;
+
+    public Vector nextLocation() {
+        if (speed == null) {
+            return this.location();
+        }
+        return this.location().add(speed);
+    }
 
     public Monster mirror() {
         return Monster.builder()
                 .id(this.id % 2 == 1 ? this.id - 1 : this.id + 1)
-                .position(Vector.of(GameConstants.FIELD_WIDTH - this.position.x(), GameConstants.FIELD_HEIGHT - this.position().y()))
-                .velocity(Vector.of(-this.velocity.x(), -this.velocity().y()))
+                .location(Vector.of(GameConstants.FIELD_WIDTH - this.location.x(), GameConstants.FIELD_HEIGHT - this.location().y()))
+                .speed(Vector.of(-this.speed.x(), -this.speed().y()))
                 .threat(Threat.MY_BASE == this.threat ? Threat.OPPONENT_BASE : Threat.OPPONENT_BASE == this.threat ? Threat.MY_BASE : Threat.NONE)
                 .build();
     }
@@ -40,6 +47,11 @@ public class Monster extends Entity {
 
     public void updateClosestHeroes(Collection<Hero> heroes) {
         closestHeroId = heroes.stream().min(Comparator.comparing(this::distance)).map(Hero::id).orElse(null);
+    }
+
+    public Monster moveToNextLocation() {
+        this.location = this.nextLocation();
+        return this;
     }
 
     @RequiredArgsConstructor
