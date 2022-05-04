@@ -5,7 +5,6 @@ import com.priitlaht.challenge.game.strategy.DefaultAi;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ public class GameState {
     final List<Monster> visibleMonsters = new ArrayList<>();
     final List<Entity> visbleEntities = new ArrayList<>();
     final Map<Integer, Hero> heroes = new HashMap<>(3);
-    Phase phase;
     int round;
 
     public static GameState instance() {
@@ -41,29 +39,37 @@ public class GameState {
         Map<Integer, Integer> previousRoundMonsterAssignments = visibleMonsters.stream()
                 .filter(Monster::hasHeroAssigned)
                 .collect(Collectors.toMap(Monster::id, Monster::assignedHeroId));
+        List<Monster> previousRoundMonsters = new ArrayList<>(visibleMonsters);
         round++;
-        phase = round < Phase.MID.startingRound ? Phase.START : round < Phase.LATE.startingRound ? Phase.MID : Phase.LATE;
         visibleMonsters.clear();
         visibleEnemies.clear();
         visbleEntities.clear();
         myBase.update(roundInfo.myBaseHealth(), roundInfo.myBaseMana());
         opponentBase.update(roundInfo.opponentBaseHealth(), roundInfo.opponentBaseHealth());
-        roundInfo.entityInfos().forEach(entity -> updateEntityState(entity, previousRoundMonsterAssignments.get(entity.id())));
+        roundInfo.entityInfos().forEach(entity ->
+                updateEntityState(entity, previousRoundMonsterAssignments.get(entity.id()), previousRoundMonsters));
         visibleMonsters.forEach(monster -> monster.updateClosestHeroes(heroes.values()));
         visbleEntities.addAll(visibleMonsters);
         visbleEntities.addAll(visibleEnemies);
     }
 
-    private void updateEntityState(Game.RoundInfo.EntityInfo entity, Integer assignedHeroId) {
+    // TODO keep previous monsters that are not dead and visible enemy heroes
+    private void updateEntityState(Game.RoundInfo.EntityInfo entity, Integer assignedHeroId, List<Monster> previousRoundMonsters) {
         switch (Game.RoundInfo.EntityInfo.Type.getByValue(entity.type())) {
             case MONSTER:
-                visibleMonsters.add(toMonster(entity, assignedHeroId));
+                Monster monster = toMonster(entity, assignedHeroId);
+                visibleMonsters.remove(monster);
+                visibleMonsters.add(monster);
+                Monster mirroredMonster = monster.mirror();
+                if (!previousRoundMonsters.contains(monster) && !visibleMonsters.contains(mirroredMonster)) {
+                    visibleMonsters.add(mirroredMonster);
+                }
                 break;
             case HERO:
                 if (round == 1) {
                     heroes.put(entity.id(), toHero(entity));
                 } else {
-                    heroes.get(entity.id()).update(Point.of(entity.x(), entity.y()), entity.shieldLife(), entity.isControlled());
+                    heroes.get(entity.id()).update(Vector.of(entity.x(), entity.y()), entity.shieldLife(), entity.isControlled());
                 }
                 break;
             case ENEMY:
@@ -74,11 +80,11 @@ public class GameState {
     private Monster toMonster(Game.RoundInfo.EntityInfo entity, Integer assignedHeroId) {
         return Monster.builder()
                 .id(entity.id())
-                .location(Point.of(entity.x(), entity.y()))
-                .shieldLife(entity.shieldLife())
+                .position(Vector.of(entity.x(), entity.y()))
+                .shieldDuration(entity.shieldLife())
                 .isControlled(entity.isControlled())
                 .health(entity.health())
-                .velocity(Point.of(entity.vx(), entity.vy()))
+                .velocity(Vector.of(entity.vx(), entity.vy()))
                 .target(Monster.Target.getByValue(entity.nearBase()))
                 .threat(Monster.Threat.getByValue(entity.threatFor()))
                 .assignedHeroId(assignedHeroId)
@@ -88,43 +94,20 @@ public class GameState {
     private Enemy toEnemy(Game.RoundInfo.EntityInfo entity) {
         return Enemy.builder()
                 .id(entity.id())
-                .location(Point.of(entity.x(), entity.y()))
-                .shieldLife(entity.shieldLife())
+                .position(Vector.of(entity.x(), entity.y()))
+                .shieldDuration(entity.shieldLife())
                 .isControlled(entity.isControlled())
                 .build();
     }
 
     private Hero toHero(Game.RoundInfo.EntityInfo entity) {
-        Point myBase = this.myBase.location();
-        Hero.HeroBuilder<?, ?> heroBuilder = Hero.builder()
+        return Hero.builder()
                 .id(entity.id())
-                .location(Point.of(entity.x(), entity.y()))
-                .shieldLife(entity.shieldLife())
-                .isControlled(entity.isControlled());
-        switch (heroes().size()) {
-            case 0:
-                heroBuilder
-                        .routine(DefaultAi.of())
-                        .origin(myBase.subtractAbs(Point.of(8815, 5300)));
-                break;
-            case 1:
-                heroBuilder
-                        .routine(DefaultAi.of())
-                        .origin(myBase.subtractAbs(Point.of(7200, 2200)));
-                break;
-            case 2:
-                heroBuilder
-                        .routine(DefaultAi.of())
-                        .origin(myBase.subtractAbs(Point.of(4000, 7800)));
-                break;
-        }
-        return heroBuilder.build();
-    }
-
-    @Getter
-    @RequiredArgsConstructor
-    public enum Phase {
-        START(0), MID(95), LATE(150);
-        final int startingRound;
+                .position(Vector.of(entity.x(), entity.y()))
+                .shieldDuration(entity.shieldLife())
+                .role(Hero.Role.JUNGLER)
+                .isControlled(entity.isControlled())
+                .routine(DefaultAi.of())
+                .build();
     }
 }

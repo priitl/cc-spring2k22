@@ -1,6 +1,7 @@
 package com.priitlaht.challenge.game.model;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
@@ -10,18 +11,20 @@ import java.util.Objects;
 @Getter
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PACKAGE)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Entity {
+    @EqualsAndHashCode.Include
     int id;
-    Point location;
-    Point velocity;
-    int shieldLife;
+    Vector position;
+    Vector speed;
+    int shieldDuration;
     boolean isControlled;
     Integer assignedHeroId;
     Integer closestHeroId;
 
-    public void update(Point location, int shieldLife, boolean isControlled) {
-        this.location = location;
-        this.shieldLife = shieldLife;
+    public void update(Vector location, int shieldDuration, boolean isControlled) {
+        this.position = location;
+        this.shieldDuration = shieldDuration;
         this.isControlled = isControlled;
     }
 
@@ -29,26 +32,26 @@ public class Entity {
         return this.assignedHeroId != null;
     }
 
-    public Point nextLocation() {
-        if (velocity == null) {
-            return this.location();
+    public Vector nextLocation() {
+        if (speed == null) {
+            return this.position();
         }
-        return this.location().add(velocity);
+        return this.position().add(speed);
     }
 
-    public boolean isAtLocation(Point location) {
-        return Objects.equals(this.location, location);
+    public boolean isAtLocation(Vector location) {
+        return Objects.equals(this.position, location);
     }
 
     public boolean isShielded() {
-        return shieldLife > 0;
+        return shieldDuration > 0;
     }
 
     public double distance(Entity other) {
-        return this.location.distance(other.location);
+        return this.position.distance(other.position);
     }
 
-    public double distance(Point point) {
-        return this.location.distance(point);
+    public double distance(Vector point) {
+        return this.position.distance(point);
     }
 }

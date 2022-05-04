@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -14,18 +15,17 @@ public class Game {
     GameState state;
 
     public static Game of(int myBaseX, int myBaseY) {
-        int enemyBaseX = Math.abs(GameConstants.FIELD_WIDTH - myBaseX);
-        int enemyBaseY = Math.abs(GameConstants.FIELD_HEIGHT - myBaseY);
         GameState state = GameState.instance();
         state.myBase().location(myBaseX, myBaseY);
-        state.opponentBase().location(enemyBaseX, enemyBaseY);
+        state.opponentBase().location(GameConstants.FIELD_WIDTH - myBaseX, GameConstants.FIELD_HEIGHT - myBaseY);
         return new Game(state);
     }
 
     public void playRound(RoundInfo roundInfo) {
         state.update(roundInfo);
         state.heroes().values().forEach(Hero::playRound);
-        state.heroes().values().forEach(hero -> System.out.println(hero.action()));
+        state.heroes().values().forEach(hero ->
+                System.out.printf("%s %s%n", hero.action(), Optional.ofNullable(hero.message()).orElse(hero.role().name())));
     }
 
     @Getter

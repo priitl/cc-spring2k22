@@ -1,5 +1,6 @@
 package com.priitlaht.challenge.game.model;
 
+import com.priitlaht.challenge.game.GameConstants;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +15,19 @@ import java.util.Comparator;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Monster extends Entity {
-    public static final int DISTANCE_PER_TURN = 400;
-    public static final int BASE_TARGET_RADIUS = 5000;
-
     int health;
-    Point velocity;
+    Vector velocity;
     Target target;
     Threat threat;
+
+    public Monster mirror() {
+        return Monster.builder()
+                .id(this.id % 2 == 1 ? this.id - 1 : this.id + 1)
+                .position(Vector.of(GameConstants.FIELD_WIDTH - this.position.x(), GameConstants.FIELD_HEIGHT - this.position().y()))
+                .velocity(Vector.of(-this.velocity.x(), -this.velocity().y()))
+                .threat(Threat.MY_BASE == this.threat ? Threat.OPPONENT_BASE : Threat.OPPONENT_BASE == this.threat ? Threat.MY_BASE : Threat.NONE)
+                .build();
+    }
 
     public boolean isTargetingBase(Base base) {
         return this.target() == Monster.Target.BASE

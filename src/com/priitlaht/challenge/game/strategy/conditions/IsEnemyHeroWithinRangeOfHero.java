@@ -12,7 +12,7 @@ public class IsEnemyHeroWithinRangeOfHero extends Routine {
     @Override
     public void play(int heroId) {
         Hero hero = GameState.instance().hero(heroId);
-        if (GameState.instance().visibleEnemies().stream().anyMatch(enemy -> enemy.distance(hero.location()) <= range)) {
+        if (GameState.instance().visibleEnemies().stream().anyMatch(enemy -> enemy.distance(hero.position()) <= range)) {
             succeed();
         } else {
             fail();

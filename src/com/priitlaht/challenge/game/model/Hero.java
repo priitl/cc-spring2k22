@@ -15,21 +15,14 @@ import java.util.Objects;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Hero extends Entity {
-    public static final int DAMAGE_RADIUS = 800;
-    public static final int DISTANCE_PER_TURN = 800;
-    public static final int VISION_RADIUS = 2200;
-    public static final int DAMAGE = 2;
     Role role;
     Routine routine;
-    Point origin;
     String action;
+    String message;
     Entity target;
 
     public void playRound() {
         this.action = null;
-        if (GameState.instance().round() == GameState.Phase.MID.startingRound() && role == Role.HARASSER) {
-            this.origin = GameState.instance().myBase().location().subtractAbs(Point.of(13630, 4500));
-        }
         if (routine.status() == null) {
             routine.start();
         }
@@ -48,33 +41,29 @@ public class Hero extends Entity {
         this.role = role;
     }
 
-    public boolean isAtOrigin() {
-        return Objects.equals(this.location, this.origin);
-    }
-
     public boolean isAssignedOrClosestTo(Monster monster) {
         return Objects.equals(monster.assignedHeroId(), this.id) || (!monster.hasHeroAssigned() && Objects.equals(monster.closestHeroId(), this.id));
     }
 
-    public void control(Entity entity, Point target) {
+    public void control(Entity entity, Vector target) {
         entity.isControlled = true;
         entity.assignedHeroId = this.id;
         GameState.instance().myBase().useMana(GameConstants.SPELL_MANA_COST);
         this.action = String.format("SPELL CONTROL %d %d %d", entity.id(), Math.round(target.x()), Math.round(target.y()));
     }
 
-    public void wind(Entity entity, Point target) {
+    public void wind(Entity entity, Vector target) {
         entity.assignedHeroId = this.id;
         this.wind(target);
     }
 
-    public void wind(Point target) {
+    public void wind(Vector target) {
         GameState.instance().myBase().useMana(GameConstants.SPELL_MANA_COST);
         this.action = String.format("SPELL WIND %d %d", Math.round(target.x()), Math.round(target.y()));
     }
 
     public void shield(Entity entity) {
-        entity.shieldLife = GameConstants.MAX_SHIELD_LIFE;
+        entity.shieldDuration = GameConstants.SPELL_SHIELD_DURATION;
         GameState.instance().myBase().useMana(GameConstants.SPELL_MANA_COST);
         this.action = String.format("SPELL SHIELD %d", entity.id());
     }
@@ -84,11 +73,7 @@ public class Hero extends Entity {
         this.action = String.format("MOVE %d %d", Math.round(entity.nextLocation().x()), Math.round(entity.nextLocation().y()));
     }
 
-    public void moveToOrigin() {
-        moveTo(origin);
-    }
-
-    public void moveTo(Point target) {
+    public void moveTo(Vector target) {
         this.action = String.format("MOVE %d %d", Math.round(target.x()), Math.round(target.y()));
     }
 

@@ -10,14 +10,13 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Base {
-    public static final int VISION_RADIUS = 6000;
     private static final Base MY_BASE_INSTANCE = new Base(true);
     private static final Base OPPONENT_BASE_INSTANCE = new Base(false);
 
     final boolean isMine;
-    Point location;
-    int health = 3;
-    int mana = 0;
+    Vector location;
+    int health = GameConstants.BASE_INITIAL_HEALTH;
+    int mana = GameConstants.BASE_INITIAL_MANA;
 
     public static Base myBaseInstance() {
         return MY_BASE_INSTANCE;
@@ -32,7 +31,7 @@ public class Base {
     }
 
     public void location(int x, int y) {
-        this.location = Point.of(x, y);
+        this.location = Vector.of(x, y);
     }
 
     public void update(int health, int mana) {

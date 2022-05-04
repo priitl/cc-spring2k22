@@ -1,5 +1,6 @@
 package com.priitlaht.challenge.game.strategy.behaviours;
 
+import com.priitlaht.challenge.game.GameConstants;
 import com.priitlaht.challenge.game.model.Hero;
 import com.priitlaht.challenge.game.strategy.actions.CastShieldOnHero;
 import com.priitlaht.challenge.game.strategy.conditions.HasEnoughMana;
@@ -19,7 +20,7 @@ public class ShieldHero extends Sequence {
         ShieldHero shieldMyself = new ShieldHero();
         shieldMyself
                 .addRoutine(IsRoundAtLeast.of(95))
-                .addRoutine(IsEnemyHeroWithinRangeOfHero.of(Hero.VISION_RADIUS))
+                .addRoutine(IsEnemyHeroWithinRangeOfHero.of(GameConstants.HERO_VISION_RADIUS))
                 .addRoutine(Inverter.of(IsHeroShielded.of()))
                 .addRoutine(HasEnoughMana.of(50))
                 .addRoutine(UpdateHeroRole.of(Hero.Role.JUNGLER))
