@@ -2,6 +2,7 @@ package com.priitlaht.challenge.game.strategy;
 
 import com.priitlaht.challenge.game.strategy.actions.MoveToGuardPosition;
 import com.priitlaht.challenge.game.strategy.actions.StayInPlace;
+import com.priitlaht.challenge.game.strategy.behaviours.DefendBaseFromEnemyHeroes;
 import com.priitlaht.challenge.game.strategy.behaviours.DefendBaseFromMonsters;
 import com.priitlaht.challenge.game.strategy.behaviours.FarmMana;
 import com.priitlaht.challenge.game.strategy.behaviours.ShieldHero;
@@ -20,6 +21,7 @@ public class DefaultAi extends RepeatForever {
         return new DefaultAi(Fallback.of(
                 ShieldHero.of(),
                 DefendBaseFromMonsters.of(),
+                DefendBaseFromEnemyHeroes.of(),
                 FarmMana.of(),
                 MoveToGuardPosition.of(),
                 StayInPlace.of()

@@ -27,8 +27,6 @@ public class Vector {
         return new Vector(nx, ny);
     }
 
-    ;
-
     public boolean equals(Vector v) {
         return v.x == x && v.y == y;
     }
@@ -127,8 +125,8 @@ public class Vector {
         return new Vector(center.x * 2 - this.x, center.y * 2 - this.y);
     }
 
-    public boolean withinBounds(double minx, double miny, double maxx, double maxy) {
-        return x >= minx && x <= maxx && y >= miny && y <= maxy;
+    public boolean withinBounds(double minX, double minY, double maxX, double maxY) {
+        return x >= minX && x <= maxX && y >= minY && y <= maxY;
     }
 
     public boolean isZero() {
@@ -139,13 +137,13 @@ public class Vector {
         return subtract(origin).truncate().add(origin);
     }
 
-    public static Vector centerOfMass(List<Vector> points) {
+    public static Vector centerOfMass(List<Vector> vectors) {
         double centroidX = 0, centroidY = 0;
-        for (Vector point : points) {
-            centroidX += point.x;
-            centroidY += point.y;
+        for (Vector vector : vectors) {
+            centroidX += vector.x;
+            centroidY += vector.y;
         }
-        return new Vector(centroidX / points.size(), centroidY / points.size());
+        return new Vector(centroidX / vectors.size(), centroidY / vectors.size());
     }
 
     @Override

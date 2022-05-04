@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
-import java.util.Objects;
-
 @Getter
 @SuperBuilder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PACKAGE)
@@ -18,15 +16,12 @@ public class Entity {
     Vector location;
     int shieldDuration;
     boolean isControlled;
+
     Integer assignedHeroId;
     Integer closestHeroId;
 
     public boolean hasHeroAssigned() {
         return this.assignedHeroId != null;
-    }
-
-    public boolean isAtLocation(Vector location) {
-        return Objects.equals(this.location, location);
     }
 
     public boolean isShielded() {

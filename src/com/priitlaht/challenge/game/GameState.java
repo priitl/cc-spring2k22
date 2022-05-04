@@ -52,7 +52,6 @@ public class GameState {
         monsters.putAll(monstersToKeepInPlay.stream().collect(Collectors.toMap(Monster::id, monster -> monster)));
     }
 
-    // TODO keep previous monsters that are not dead and visible enemy heroes
     private void updateEntityState(Game.RoundInfo.EntityInfo entity) {
         switch (Game.RoundInfo.EntityInfo.Type.getByValue(entity.type())) {
             case MONSTER:
@@ -79,10 +78,10 @@ public class GameState {
                 .threat(Monster.Threat.getByValue(entity.threatFor()))
                 .build();
         Monster mirroredMonster = monster.mirror();
+        monsters.put(entity.id(), monster);
         if (!monsters.containsKey(mirroredMonster.id()) && isWithinBoundsAndNotSeen(mirroredMonster, mirroredMonster.location())) {
             monsters.put(mirroredMonster.id(), mirroredMonster);
         }
-        monsters.put(entity.id(), monster);
     }
 
     private void addOrUpdateEnemy(Game.RoundInfo.EntityInfo entity) {

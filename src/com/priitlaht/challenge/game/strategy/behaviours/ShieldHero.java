@@ -1,7 +1,6 @@
 package com.priitlaht.challenge.game.strategy.behaviours;
 
 import com.priitlaht.challenge.game.GameConstants;
-import com.priitlaht.challenge.game.model.Hero;
 import com.priitlaht.challenge.game.strategy.actions.CastShieldOnHero;
 import com.priitlaht.challenge.game.strategy.conditions.HasEnoughMana;
 import com.priitlaht.challenge.game.strategy.conditions.IsEnemyHeroWithinRangeOfHero;
@@ -10,7 +9,6 @@ import com.priitlaht.challenge.game.strategy.conditions.IsRoundAtLeast;
 import com.priitlaht.challenge.game.strategy.engine.Inverter;
 import com.priitlaht.challenge.game.strategy.engine.Routine;
 import com.priitlaht.challenge.game.strategy.engine.Sequence;
-import com.priitlaht.challenge.game.strategy.helpers.UpdateHeroRole;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +21,6 @@ public class ShieldHero extends Sequence {
                 .addRoutine(IsEnemyHeroWithinRangeOfHero.of(GameConstants.HERO_VISION_RADIUS))
                 .addRoutine(Inverter.of(IsHeroShielded.of()))
                 .addRoutine(HasEnoughMana.of(50))
-                .addRoutine(UpdateHeroRole.of(Hero.Role.JUNGLER))
                 .addRoutine(CastShieldOnHero.of());
         return shieldMyself;
     }

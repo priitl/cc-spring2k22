@@ -21,9 +21,11 @@ public class Hero extends Entity {
     String action;
     String message;
     Entity target;
+    Vector guardPosition;
 
     public void resolveAction() {
         this.action = null;
+        this.message = null;
         if (routine.status() == null) {
             routine.start();
         }
@@ -46,8 +48,16 @@ public class Hero extends Entity {
         this.role = role;
     }
 
-    public boolean isAssignedOrClosestTo(Monster monster) {
-        return Objects.equals(monster.assignedHeroId(), this.id) || (!monster.hasHeroAssigned() && Objects.equals(monster.closestHeroId(), this.id));
+    public void updateGuardPosition(Vector guardPosition) {
+        this.guardPosition = guardPosition;
+    }
+
+    public void updateMessage(String message) {
+        this.message = message;
+    }
+
+    public boolean isAssignedOrClosestTo(Entity entity) {
+        return Objects.equals(entity.assignedHeroId(), this.id) || (!entity.hasHeroAssigned() && Objects.equals(entity.closestHeroId(), this.id));
     }
 
     public void control(Entity entity, Vector target) {
@@ -73,17 +83,17 @@ public class Hero extends Entity {
         this.action = String.format("SPELL SHIELD %d", entity.id());
     }
 
-    public void attack(Monster entity) {
-        entity.assignedHeroId = this.id;
-        this.action = String.format("MOVE %d %d", Math.round(entity.nextLocation().x()), Math.round(entity.nextLocation().y()));
-    }
-
     public void moveTo(Vector target) {
         this.action = String.format("MOVE %d %d", Math.round(target.x()), Math.round(target.y()));
     }
 
     public void stayInPlace() {
         this.action = "WAIT";
+    }
+
+    public void intercept(Entity entity, Vector interceptLocation) {
+        entity.assignedHeroId = this.id;
+        this.action = String.format("MOVE %d %d", Math.round(interceptLocation.x()), Math.round(interceptLocation.y()));
     }
 
     @RequiredArgsConstructor

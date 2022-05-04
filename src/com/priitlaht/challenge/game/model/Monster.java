@@ -33,6 +33,7 @@ public class Monster extends Entity {
                 .location(Vector.of(GameConstants.FIELD_WIDTH - this.location.x(), GameConstants.FIELD_HEIGHT - this.location().y()))
                 .speed(Vector.of(-this.speed.x(), -this.speed().y()))
                 .threat(Threat.MY_BASE == this.threat ? Threat.OPPONENT_BASE : Threat.OPPONENT_BASE == this.threat ? Threat.MY_BASE : Threat.NONE)
+                .target(this.target)
                 .build();
     }
 

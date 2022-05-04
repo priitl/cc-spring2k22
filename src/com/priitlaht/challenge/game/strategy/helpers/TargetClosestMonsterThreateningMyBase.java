@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.Optional;
 
 @NoArgsConstructor(staticName = "of")
-public class TargetMonsterClosestToMyBase extends Routine {
+public class TargetClosestMonsterThreateningMyBase extends Routine {
     @Override
     public void play(int heroId) {
         Base myBase = GameState.instance().myBase();

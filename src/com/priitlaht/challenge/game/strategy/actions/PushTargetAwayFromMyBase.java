@@ -15,7 +15,6 @@ public class PushTargetAwayFromMyBase extends Routine {
         Vector heroLocation = hero.location();
         Vector baseLocation = GameState.instance().myBase().location();
         Vector normalize = heroLocation.subtract(baseLocation).normalize();
-        System.err.println(normalize);
         Vector windTowards = heroLocation.add(normalize.multiply(GameConstants.SPELL_WIND_RADIUS));
 
         hero.wind(hero.target(), windTowards);

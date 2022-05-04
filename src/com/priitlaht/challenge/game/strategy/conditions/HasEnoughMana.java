@@ -1,5 +1,6 @@
 package com.priitlaht.challenge.game.strategy.conditions;
 
+import com.priitlaht.challenge.game.GameConstants;
 import com.priitlaht.challenge.game.GameState;
 import com.priitlaht.challenge.game.strategy.engine.Routine;
 import lombok.AccessLevel;
@@ -10,7 +11,7 @@ public class HasEnoughMana extends Routine {
     private final int reserved;
 
     public static HasEnoughMana of() {
-        return new HasEnoughMana(0);
+        return new HasEnoughMana(GameConstants.SPELL_MANA_COST);
     }
 
     public static HasEnoughMana of(int reserved) {

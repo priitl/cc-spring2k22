@@ -20,7 +20,7 @@ public class AttackArea extends Routine {
         Hero hero = GameState.instance().hero(heroId);
         List<Vector> nextLocations = visibleMonsters.stream()
                 .map(Monster::nextLocation)
-                .filter(nextLocation -> hero.distance(nextLocation) <= GameConstants.HERO_DAMAGE_RADIUS)
+                .filter(nextLocation -> hero.distance(nextLocation) <= GameConstants.HERO_DAMAGE_RADIUS + GameConstants.HERO_DISTANCE_PER_TURN)
                 .collect(Collectors.toList());
         if (nextLocations.isEmpty()) {
             fail();

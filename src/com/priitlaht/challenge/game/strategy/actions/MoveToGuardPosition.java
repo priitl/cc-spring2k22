@@ -7,34 +7,34 @@ import com.priitlaht.challenge.game.model.Vector;
 import com.priitlaht.challenge.game.strategy.engine.Routine;
 import lombok.NoArgsConstructor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Objects;
 
 @NoArgsConstructor(staticName = "of")
 public class MoveToGuardPosition extends Routine {
-    Vector[] guardPositions = new Vector[]{Vector.of(4995, 3750), Vector.of(5581, 1439), Vector.of(1849, 5813)};
+    Vector[] defaultPositions = new Vector[]{Vector.of(7800, 4500), Vector.of(3600, 6500), Vector.of(6800, 2000)};
 
     @Override
     public void play(int heroId) {
+        Vector[] guardPositions = new Vector[3];
+        if (GameState.instance().myBase().location().x() > GameState.instance().opponentBase().location().x()) {
+            for (int i = 0; i < defaultPositions.length; i++) {
+                guardPositions[i] = Vector.of(GameConstants.FIELD_WIDTH, GameConstants.FIELD_HEIGHT).subtract(defaultPositions[i]);
+            }
+        } else {
+            guardPositions = defaultPositions;
+        }
         Hero currentHero = GameState.instance().hero(heroId);
         Collection<Hero> heroes = GameState.instance().heroes().values();
-        List<Vector> closestToUnguarded = new ArrayList<>();
-        for (Vector guardPosition : guardPositions) {
-            double currentHeroDistance = currentHero.distance(guardPosition);
-            boolean isClosest = heroes.stream().noneMatch(otherHero -> currentHero.id() != otherHero.id() && otherHero.distance(guardPosition) < currentHeroDistance);
-            if (isClosest) {
-                closestToUnguarded.add(guardPosition);
-            }
-        }
-        Vector target = closestToUnguarded.stream()
+        Vector target = Arrays.stream(guardPositions)
+                .filter(position -> heroes.stream().noneMatch(otherHero -> currentHero.id() != otherHero.id()
+                        && Objects.equals(position, otherHero.guardPosition())))
                 .min(Comparator.comparing(currentHero::distance))
-                .orElseGet(() -> Arrays.stream(guardPositions)
-                        .min(Comparator.comparing(currentHero::distance))
-                        .orElse(guardPositions[0]));
-        if (GameState.instance().myBase().location().x() > GameState.instance().myBase().location().x()) {
-            currentHero.moveTo(Vector.of(GameConstants.FIELD_WIDTH - target.x(), GameConstants.FIELD_HEIGHT - target.y()));
-        } else {
-            currentHero.moveTo(target);
-        }
+                .orElse(guardPositions[0]);
+        currentHero.moveTo(target);
+        currentHero.updateGuardPosition(target);
         succeed();
     }
 }
