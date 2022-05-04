@@ -5,7 +5,9 @@ import com.priitlaht.challenge.game.model.Hero;
 import com.priitlaht.challenge.game.strategy.AiContext;
 import com.priitlaht.challenge.game.strategy.actions.InterceptTarget;
 import com.priitlaht.challenge.game.strategy.actions.PushTargetAwayFromMyBase;
+import com.priitlaht.challenge.game.strategy.actions.RedirectTargetAwayFromByBase;
 import com.priitlaht.challenge.game.strategy.conditions.HasEnoughMana;
+import com.priitlaht.challenge.game.strategy.conditions.IsTargetControlled;
 import com.priitlaht.challenge.game.strategy.conditions.IsTargetShielded;
 import com.priitlaht.challenge.game.strategy.conditions.IsTargetWithinRangeOfHero;
 import com.priitlaht.challenge.game.strategy.engine.Fallback;
@@ -30,6 +32,12 @@ public class DefendBaseFromEnemyHeroes extends Sequence {
                                 Inverter.of(IsTargetShielded.of()),
                                 IsTargetWithinRangeOfHero.of(GameConstants.SPELL_WIND_RADIUS - GameConstants.HERO_DISTANCE_PER_TURN),
                                 PushTargetAwayFromMyBase.of()),
+                        Sequence.of(
+                                HasEnoughMana.of(),
+                                Inverter.of(IsTargetShielded.of()),
+                                Inverter.of(IsTargetControlled.of()),
+                                IsTargetWithinRangeOfHero.of(GameConstants.SPELL_CONTROL_RADIUS - GameConstants.HERO_DISTANCE_PER_TURN),
+                                RedirectTargetAwayFromByBase.of(GameConstants.HERO_DISTANCE_PER_TURN)),
                         InterceptTarget.of()));
         return defendBase;
     }

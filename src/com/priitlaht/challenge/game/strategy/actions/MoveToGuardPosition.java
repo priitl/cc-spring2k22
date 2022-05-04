@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @NoArgsConstructor(staticName = "of")
 public class MoveToGuardPosition extends Routine {
-    Vector[] defaultPositions = new Vector[]{Vector.of(7800, 4500), Vector.of(3600, 6500), Vector.of(6800, 2000)};
+    Vector[] defaultPositions = new Vector[]{Vector.of(8800, 2200), Vector.of(3600, 6500), Vector.of(6800, 2000)};
 
     @Override
     public void play(int heroId) {

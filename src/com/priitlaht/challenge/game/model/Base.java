@@ -26,10 +26,6 @@ public class Base {
         return OPPONENT_BASE_INSTANCE;
     }
 
-    public boolean hasEnoughManaForSpells() {
-        return mana >= GameConstants.SPELL_MANA_COST;
-    }
-
     public void location(int x, int y) {
         this.location = Vector.of(x, y);
     }

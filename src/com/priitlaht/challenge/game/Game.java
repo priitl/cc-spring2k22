@@ -1,11 +1,14 @@
 package com.priitlaht.challenge.game;
 
+import com.priitlaht.challenge.game.model.Entity;
 import com.priitlaht.challenge.game.model.Hero;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -22,8 +25,9 @@ public class Game {
 
     public void playRound(RoundInfo roundInfo) {
         state.update(roundInfo);
-        state.heroes().values().forEach(Hero::resolveAction);
-        state.heroes().values().forEach(Hero::playAction);
+        List<Hero> heroes = state.heroes().values().stream().sorted(Comparator.comparing(Entity::id)).collect(Collectors.toList());
+        heroes.forEach(Hero::resolveAction);
+        heroes.forEach(Hero::playAction);
     }
 
     @Getter

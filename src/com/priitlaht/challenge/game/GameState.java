@@ -20,9 +20,9 @@ public class GameState {
 
     final Base myBase = Base.myBaseInstance();
     final Base opponentBase = Base.opponentBaseInstance();
+    final Map<Integer, Hero> heroes = new HashMap<>(3);
     final Map<Integer, Enemy> enemies = new HashMap<>(3);
     final Map<Integer, Monster> monsters = new HashMap<>();
-    final Map<Integer, Hero> heroes = new HashMap<>(3);
     int round;
 
     public static GameState instance() {
@@ -62,6 +62,7 @@ public class GameState {
                 break;
             case ENEMY:
                 addOrUpdateEnemy(entity);
+                break;
         }
     }
 
@@ -95,14 +96,14 @@ public class GameState {
     }
 
     private void addOrUpdateHero(Game.RoundInfo.EntityInfo entity) {
-        Hero.HeroBuilder<?, ?> builder = round == 1 ? Hero.builder() : heroes.get(entity.id()).toBuilder();
+        Hero.HeroBuilder<?, ?> builder = heroes.containsKey(entity.id())
+                ? heroes.get(entity.id()).toBuilder()
+                : Hero.builder().routine(DefaultAi.of()).role(Hero.Role.JUNGLER);
         heroes.put(entity.id(), builder
                 .id(entity.id())
                 .location(Vector.of(entity.x(), entity.y()))
                 .shieldDuration(entity.shieldLife())
-                .role(Hero.Role.JUNGLER)
                 .isControlled(entity.isControlled())
-                .routine(DefaultAi.of())
                 .build());
     }
 

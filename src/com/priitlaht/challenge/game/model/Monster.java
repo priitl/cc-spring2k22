@@ -2,6 +2,7 @@ package com.priitlaht.challenge.game.model;
 
 import com.priitlaht.challenge.game.GameConstants;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,6 +15,7 @@ import java.util.Comparator;
 @Getter
 @SuperBuilder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class Monster extends Entity {
     int health;
     Vector speed;

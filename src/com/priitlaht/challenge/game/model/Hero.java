@@ -4,6 +4,7 @@ import com.priitlaht.challenge.game.GameConstants;
 import com.priitlaht.challenge.game.GameState;
 import com.priitlaht.challenge.game.strategy.engine.Routine;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,6 +16,7 @@ import java.util.Optional;
 @Getter
 @SuperBuilder(toBuilder = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 public class Hero extends Entity {
     Role role;
     Routine routine;
@@ -98,6 +100,6 @@ public class Hero extends Entity {
 
     @RequiredArgsConstructor
     public enum Role {
-        HARASSER, DEFENDER, JUNGLER;
+        HARASSER, DEFENDER, JUNGLER
     }
 }

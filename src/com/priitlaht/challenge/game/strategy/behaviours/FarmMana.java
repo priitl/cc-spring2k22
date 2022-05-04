@@ -4,6 +4,7 @@ import com.priitlaht.challenge.game.model.Hero;
 import com.priitlaht.challenge.game.strategy.actions.AttackArea;
 import com.priitlaht.challenge.game.strategy.actions.InterceptTarget;
 import com.priitlaht.challenge.game.strategy.conditions.IsHeroWithinRangeOfGuardPosition;
+import com.priitlaht.challenge.game.strategy.conditions.IsHeroWithinRangeOfMyBase;
 import com.priitlaht.challenge.game.strategy.engine.Fallback;
 import com.priitlaht.challenge.game.strategy.engine.Routine;
 import com.priitlaht.challenge.game.strategy.engine.Sequence;
@@ -18,6 +19,7 @@ public class FarmMana extends Sequence {
         FarmMana farmMana = new FarmMana();
         farmMana
                 .addRoutine(IsHeroWithinRangeOfGuardPosition.of(4500))
+                .addRoutine(IsHeroWithinRangeOfMyBase.of(10000))
                 .addRoutine(Fallback.of(
                         AttackArea.of(),
                         Sequence.of(TargetMonsterClosestToHero.of(), InterceptTarget.of())))
