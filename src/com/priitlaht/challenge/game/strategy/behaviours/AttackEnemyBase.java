@@ -7,10 +7,7 @@ import com.priitlaht.challenge.game.strategy.actions.CastShieldOnTarget;
 import com.priitlaht.challenge.game.strategy.actions.PatrolNearEnemyBase;
 import com.priitlaht.challenge.game.strategy.actions.PushTargetToEnemyBase;
 import com.priitlaht.challenge.game.strategy.actions.RedirectTargetToEnemyBase;
-import com.priitlaht.challenge.game.strategy.conditions.HasEnoughMana;
-import com.priitlaht.challenge.game.strategy.conditions.IsHeroInRole;
-import com.priitlaht.challenge.game.strategy.conditions.IsRoundAtLeast;
-import com.priitlaht.challenge.game.strategy.conditions.IsTargetWithinRangeOfHero;
+import com.priitlaht.challenge.game.strategy.conditions.*;
 import com.priitlaht.challenge.game.strategy.engine.Fallback;
 import com.priitlaht.challenge.game.strategy.engine.Routine;
 import com.priitlaht.challenge.game.strategy.engine.Sequence;
@@ -24,7 +21,7 @@ public class AttackEnemyBase extends Sequence {
     public static Routine of() {
         AttackEnemyBase attackBase = new AttackEnemyBase();
         attackBase
-                .addRoutine(IsHeroInRole.of(Hero.Role.JUNGLER))
+                .addRoutine(IsHeroInRole.of(Hero.Role.HARASSER))
                 .addRoutine(IsRoundAtLeast.of(95))
                 .addRoutine(Fallback.of(
                         Sequence.of(
@@ -35,6 +32,7 @@ public class AttackEnemyBase extends Sequence {
                                                 IsTargetWithinRangeOfHero.of(GameConstants.SPELL_WIND_RADIUS),
                                                 PushTargetToEnemyBase.of()),
                                         Sequence.of(
+                                                IsTargetWithinRangeOfEnemyBase.of(GameConstants.MONSTER_BASE_TARGET_RADIUS),
                                                 IsTargetWithinRangeOfHero.of(GameConstants.SPELL_SHIELD_RADIUS),
                                                 CastShieldOnTarget.of())
                                 )

@@ -127,6 +127,6 @@ public class Hero extends Entity {
 
     @RequiredArgsConstructor
     public enum Role {
-        HARASSER, DEFENDER, JUNGLER
+        INTERCEPTOR, DEFENDER, HARASSER
     }
 }

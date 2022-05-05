@@ -20,12 +20,12 @@ public class DefendBaseFromEnemyHeroes extends Sequence {
     public static Routine of() {
         DefendBaseFromEnemyHeroes defendBase = new DefendBaseFromEnemyHeroes();
         defendBase
-                .addRoutine(TargetClosestEnemyHeroWithinRangeOfMyBase.of(AiContext.NEAR_BASE_THRESHOLD))
+                .addRoutine(TargetClosestEnemyHeroWithinRangeOfMyBase.of(AiContext.ENEMY_NEAR_BASE_THRESHOLD))
                 .addRoutine(Fallback.of(
                         Sequence.of(
                                 HasEnoughMana.of(),
                                 Inverter.of(IsTargetShielded.of()),
-                                IsTargetWithinRangeOfHero.of(GameConstants.SPELL_WIND_RADIUS - GameConstants.HERO_DISTANCE_PER_TURN),
+                                IsTargetWithinRangeOfHero.of(GameConstants.SPELL_WIND_RADIUS),
                                 PushTargetAwayFromMyBase.of()),
                         InterceptTarget.of()));
         return defendBase;

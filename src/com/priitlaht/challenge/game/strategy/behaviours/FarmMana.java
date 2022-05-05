@@ -20,7 +20,7 @@ public class FarmMana extends Sequence {
         FarmMana farmMana = new FarmMana();
         farmMana
                 .addRoutine(Fallback.of(
-                        IsHeroInRole.of(Hero.Role.JUNGLER),
+                        IsHeroInRole.of(Hero.Role.HARASSER),
                         Sequence.of(
                                 IsHeroWithinRangeOfMyBase.of(10000),
                                 IsHeroWithinRangeOfGuardPosition.of(GameConstants.HERO_VISION_RADIUS)

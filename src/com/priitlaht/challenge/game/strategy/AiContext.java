@@ -11,4 +11,5 @@ public class AiContext extends HashMap<String, Object> {
 
     public static final int MONSTER_BASE_DETECTION_THRESHOLD = 5000;
     public static final int NEAR_BASE_THRESHOLD = 7000;
+    public static final int ENEMY_NEAR_BASE_THRESHOLD = 8000;
 }

@@ -5,7 +5,10 @@ import com.priitlaht.challenge.game.model.Hero;
 import com.priitlaht.challenge.game.strategy.actions.MoveToGuardPosition;
 import com.priitlaht.challenge.game.strategy.actions.MoveToNearestMonsterSpawnPosition;
 import com.priitlaht.challenge.game.strategy.actions.StayInPlace;
-import com.priitlaht.challenge.game.strategy.behaviours.*;
+import com.priitlaht.challenge.game.strategy.behaviours.AttackEnemyBase;
+import com.priitlaht.challenge.game.strategy.behaviours.DefendBaseFromMonsters;
+import com.priitlaht.challenge.game.strategy.behaviours.FarmMana;
+import com.priitlaht.challenge.game.strategy.behaviours.ShieldHero;
 import com.priitlaht.challenge.game.strategy.conditions.IsHeroInRole;
 import com.priitlaht.challenge.game.strategy.conditions.IsHeroWithinRangeOfEnemyBase;
 import com.priitlaht.challenge.game.strategy.engine.*;
@@ -24,10 +27,9 @@ public class DefaultAi extends RepeatForever {
                         IsHeroInRole.of(Hero.Role.DEFENDER),
                         Fallback.of(
                                 DefendBaseFromMonsters.of(),
-                                DefendBaseFromEnemyHeroes.of(),
                                 FarmMana.of(),
                                 MoveToGuardPosition.of())),
-                Sequence.of(IsHeroInRole.of(Hero.Role.JUNGLER),
+                Sequence.of(IsHeroInRole.of(Hero.Role.HARASSER),
                         Fallback.of(
                                 AttackEnemyBase.of(),
                                 Sequence.of(

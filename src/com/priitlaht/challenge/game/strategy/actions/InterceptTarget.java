@@ -25,9 +25,9 @@ public class InterceptTarget extends Routine {
                 interceptLocation.add(monster.speed());
             }
             hero.intercept(monster, interceptLocation);
-            succeed();
         } else {
-            fail();
+            hero.intercept(target, target.location());
         }
+        succeed();
     }
 }
