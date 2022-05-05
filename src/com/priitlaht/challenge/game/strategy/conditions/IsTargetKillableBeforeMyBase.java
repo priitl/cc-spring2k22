@@ -23,7 +23,7 @@ public class IsTargetKillableBeforeMyBase extends Routine {
         Monster monster = (Monster) target;
         int timeToKill = monster.health() / GameConstants.HERO_DAMAGE;
         double targetTimeToBase = Math.ceil((monster.distance(baseLocation) - GameConstants.MONSTER_BASE_KILL_RADIUS) / GameConstants.MONSTER_DISTANCE_PER_TURN);
-        double timeToTarget = Math.ceil(hero.distance(monster) / (GameConstants.HERO_DISTANCE_PER_TURN - GameConstants.MONSTER_DISTANCE_PER_TURN)) - 1;
+        double timeToTarget = Math.ceil(hero.distance(monster) / (GameConstants.HERO_DISTANCE_PER_TURN - GameConstants.MONSTER_DISTANCE_PER_TURN));
         if (targetTimeToBase > timeToKill + timeToTarget) {
             succeed();
         } else {

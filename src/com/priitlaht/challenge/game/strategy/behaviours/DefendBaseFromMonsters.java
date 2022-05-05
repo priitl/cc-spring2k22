@@ -4,7 +4,7 @@ import com.priitlaht.challenge.game.GameConstants;
 import com.priitlaht.challenge.game.strategy.AiContext;
 import com.priitlaht.challenge.game.strategy.actions.InterceptTarget;
 import com.priitlaht.challenge.game.strategy.actions.PushTargetAwayFromMyBase;
-import com.priitlaht.challenge.game.strategy.actions.RedirectTargetAwayFromByBase;
+import com.priitlaht.challenge.game.strategy.actions.RedirectTargetAwayFromMyBase;
 import com.priitlaht.challenge.game.strategy.conditions.*;
 import com.priitlaht.challenge.game.strategy.engine.Fallback;
 import com.priitlaht.challenge.game.strategy.engine.Inverter;
@@ -40,7 +40,7 @@ public class DefendBaseFromMonsters extends Sequence {
                                 Inverter.of(IsTargetNextLocationWithinRangeOfMyBase.of(GameConstants.MONSTER_BASE_TARGET_RADIUS)),
                                 IsTargetNextLocationWithinRangeOfMyBase.of(AiContext.NEAR_BASE_THRESHOLD),
                                 IsTargetWithinRangeOfHero.of(GameConstants.SPELL_CONTROL_RADIUS),
-                                RedirectTargetAwayFromByBase.of(GameConstants.MONSTER_DISTANCE_PER_TURN)),
+                                RedirectTargetAwayFromMyBase.of(GameConstants.MONSTER_DISTANCE_PER_TURN)),
                         InterceptTarget.of()
                 ));
         return defendBase;

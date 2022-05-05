@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 
 @RequiredArgsConstructor(staticName = "of")
-public class RedirectTargetAwayFromByBase extends Routine {
+public class RedirectTargetAwayFromMyBase extends Routine {
     private final int targetSpeed;
 
     @Override

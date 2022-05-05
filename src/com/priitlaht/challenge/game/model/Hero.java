@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
-import java.util.Optional;
 
 @Getter
 @SuperBuilder(toBuilder = true)
@@ -38,7 +37,8 @@ public class Hero extends Entity {
     }
 
     public void playAction() {
-        System.out.printf("%s %s%n", action, Optional.ofNullable(message).orElse(role.name()));
+        //System.out.printf("%s %s%n", action, Optional.ofNullable(message).orElse(role.name()));
+        System.out.printf("%s%n", action);
     }
 
     public double distanceToTarget() {
