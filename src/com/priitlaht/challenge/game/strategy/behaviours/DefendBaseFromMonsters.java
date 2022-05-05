@@ -1,7 +1,6 @@
 package com.priitlaht.challenge.game.strategy.behaviours;
 
 import com.priitlaht.challenge.game.GameConstants;
-import com.priitlaht.challenge.game.model.Hero;
 import com.priitlaht.challenge.game.strategy.AiContext;
 import com.priitlaht.challenge.game.strategy.actions.InterceptTarget;
 import com.priitlaht.challenge.game.strategy.actions.PushTargetAwayFromMyBase;
@@ -12,7 +11,6 @@ import com.priitlaht.challenge.game.strategy.engine.Inverter;
 import com.priitlaht.challenge.game.strategy.engine.Routine;
 import com.priitlaht.challenge.game.strategy.engine.Sequence;
 import com.priitlaht.challenge.game.strategy.helpers.TargetClosestMonsterThreateningMyBase;
-import com.priitlaht.challenge.game.strategy.helpers.UpdateHeroRole;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +21,6 @@ public class DefendBaseFromMonsters extends Sequence {
         DefendBaseFromMonsters defendBase = new DefendBaseFromMonsters();
         defendBase
                 .addRoutine(TargetClosestMonsterThreateningMyBase.of())
-                .addRoutine(UpdateHeroRole.of(Hero.Role.DEFENDER))
                 .addRoutine(Fallback.of(
                         Sequence.of(
                                 HasEnoughMana.of(),
@@ -36,6 +33,7 @@ public class DefendBaseFromMonsters extends Sequence {
                                 PushTargetAwayFromMyBase.of()),
                         Sequence.of(
                                 HasEnoughMana.of(),
+                                IsRoundAtLeast.of(95),
                                 IsTargetThreateningMyBase.of(),
                                 Inverter.of(IsTargetShielded.of()),
                                 Inverter.of(IsTargetControlled.of()),

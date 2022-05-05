@@ -98,7 +98,7 @@ public class GameState {
     private void addOrUpdateHero(Game.RoundInfo.EntityInfo entity) {
         Hero.HeroBuilder<?, ?> builder = heroes.containsKey(entity.id())
                 ? heroes.get(entity.id()).toBuilder()
-                : Hero.builder().routine(DefaultAi.of()).role(Hero.Role.JUNGLER);
+                : Hero.builder().routine(DefaultAi.of()).role(heroes.size() == 0 ? Hero.Role.JUNGLER : Hero.Role.DEFENDER);
         heroes.put(entity.id(), builder
                 .id(entity.id())
                 .location(Vector.of(entity.x(), entity.y()))

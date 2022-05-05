@@ -6,6 +6,7 @@ import lombok.experimental.UtilityClass;
 public class GameConstants {
     public static final int FIELD_WIDTH = 17630;
     public static final int FIELD_HEIGHT = 9000;
+    public static int MAP_LIMIT = 800;
 
     public static final int SPELL_MANA_COST = 10;
     public static final int SPELL_CONTROL_RADIUS = 2200;

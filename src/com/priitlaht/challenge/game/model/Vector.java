@@ -63,6 +63,17 @@ public class Vector {
         return Math.sqrt(x * x + y * y);
     }
 
+    public Vector stepTo(Vector destination, int speed) {
+        Vector v = new Vector(this, destination);
+        Vector target;
+        if (v.lengthSquared() <= speed * speed) {
+            target = v;
+        } else {
+            target = v.normalize().multiply(speed);
+        }
+        return this.add(target);
+    }
+
     public double lengthSquared() {
         return x * x + y * y;
     }

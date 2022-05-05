@@ -24,9 +24,12 @@ public class Hero extends Entity {
     String message;
     Entity target;
     Vector guardPosition;
+    Vector patrolDestination;
+    boolean patrolReversed;
 
     public void resolveAction() {
         this.action = null;
+        this.target = null;
         this.message = null;
         if (routine.status() == null) {
             routine.start();
@@ -50,12 +53,12 @@ public class Hero extends Entity {
         this.role = role;
     }
 
-    public void updateGuardPosition(Vector guardPosition) {
-        this.guardPosition = guardPosition;
-    }
-
     public void updateMessage(String message) {
         this.message = message;
+    }
+
+    public void updateGuardPosition(Vector guardPosition) {
+        this.guardPosition = guardPosition;
     }
 
     public boolean isAssignedOrClosestTo(Entity entity) {
@@ -85,7 +88,31 @@ public class Hero extends Entity {
         this.action = String.format("SPELL SHIELD %d", entity.id());
     }
 
+    public void patrolBetween(Vector[] positions) {
+        if (this.patrolDestination == null) {
+            this.patrolDestination = positions[0];
+        }
+        if (this.location.equals(patrolDestination)) {
+            for (int i = 0; i < positions.length; i++) {
+                if (this.location.equals(positions[i])) {
+                    if (this.patrolReversed) {
+                        this.patrolReversed = !(i == 1);
+                        this.patrolDestination = positions[i - 1];
+                        System.err.println("Reversed: " + patrolDestination.x());
+                    } else {
+                        this.patrolReversed = i == positions.length - 2;
+                        this.patrolDestination = positions[i + 1];
+                        System.err.println("Regular: " + patrolDestination.x());
+                    }
+                    break;
+                }
+            }
+        }
+        moveTo(this.patrolDestination);
+    }
+
     public void moveTo(Vector target) {
+        this.location = this.location.stepTo(target, GameConstants.HERO_DISTANCE_PER_TURN);
         this.action = String.format("MOVE %d %d", Math.round(target.x()), Math.round(target.y()));
     }
 
